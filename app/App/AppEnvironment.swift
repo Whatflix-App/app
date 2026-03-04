@@ -43,7 +43,10 @@ struct AppEnvironment {
         WatchlistViewModel(service: WatchlistService(apiClient: apiClient))
     }
 
-    func makeProfileViewModel() -> ProfileViewModel {
-        ProfileViewModel(service: ProfileService(apiClient: apiClient))
+    func makeProfileViewModel(session: SessionStore) -> ProfileViewModel {
+        ProfileViewModel(
+            service: ProfileService(apiClient: apiClient),
+            session: session
+        )
     }
 }

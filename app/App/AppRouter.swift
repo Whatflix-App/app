@@ -11,7 +11,7 @@ struct AppRouter: View {
             } else if !session.hasCompletedOnboarding {
                 OnboardingView(viewModel: environment.makeOnboardingViewModel(session: session))
             } else {
-                MainTabView(environment: environment)
+                MainTabView(environment: environment, session: session)
             }
         }
     }
@@ -19,6 +19,7 @@ struct AppRouter: View {
 
 private struct MainTabView: View {
     let environment: AppEnvironment
+    let session: SessionStore
 
     @StateObject private var forYouViewModel: ForYouViewModel
     @StateObject private var searchViewModel: SearchViewModel
@@ -27,14 +28,15 @@ private struct MainTabView: View {
     @StateObject private var watchlistViewModel: WatchlistViewModel
     @StateObject private var profileViewModel: ProfileViewModel
 
-    init(environment: AppEnvironment) {
+    init(environment: AppEnvironment, session: SessionStore) {
         self.environment = environment
+        self.session = session
         _forYouViewModel = StateObject(wrappedValue: environment.makeForYouViewModel())
         _searchViewModel = StateObject(wrappedValue: environment.makeSearchViewModel())
         _ratingsViewModel = StateObject(wrappedValue: environment.makeRatingsViewModel())
         _catalogsViewModel = StateObject(wrappedValue: environment.makeCatalogsViewModel())
         _watchlistViewModel = StateObject(wrappedValue: environment.makeWatchlistViewModel())
-        _profileViewModel = StateObject(wrappedValue: environment.makeProfileViewModel())
+        _profileViewModel = StateObject(wrappedValue: environment.makeProfileViewModel(session: session))
     }
 
     var body: some View {

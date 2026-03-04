@@ -5,9 +5,17 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            Text(viewModel.title)
-                .font(FlicksTypography.screenTitle)
-                .navigationTitle("Profile")
+            VStack(spacing: 16) {
+                Text(viewModel.title)
+                    .font(FlicksTypography.screenTitle)
+
+                Button("Logout") {
+                    viewModel.logout()
+                }
+                .buttonStyle(PrimaryButtonStyle())
+            }
+            .navigationTitle("Profile")
+            .padding()
         }
     }
 }
