@@ -1,0 +1,43 @@
+# macOS
+.DS_Store
+
+# Editor swap/backup files
+*.swp
+*~
+
+# Xcode user/state
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# Build outputs
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# Fastlane artifacts
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Optional tooling
+.mint/
+.tuist-cache/
