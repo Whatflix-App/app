@@ -1,9 +1,9 @@
 import Foundation
 
 final class WatchlistService {
-    private let apiClient: APIClient
+    private let apiClient: any APIClienting
 
-    init(apiClient: APIClient) {
+    init(apiClient: any APIClienting) {
         self.apiClient = apiClient
     }
 

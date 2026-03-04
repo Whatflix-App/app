@@ -1,9 +1,13 @@
 import Foundation
 
-final class AuthService {
-    private let apiClient: APIClient
+protocol AuthServicing {
+    func login(with credentials: LoginCredentials) async throws
+}
 
-    init(apiClient: APIClient) {
+final class AuthService: AuthServicing {
+    private let apiClient: any APIClienting
+
+    init(apiClient: any APIClienting) {
         self.apiClient = apiClient
     }
 

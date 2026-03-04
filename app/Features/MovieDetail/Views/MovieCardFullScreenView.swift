@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MovieCardFullScreenView: View {
-    @StateObject var viewModel: MovieDetailViewModel
+    @ObservedObject var viewModel: MovieDetailViewModel
 
     var body: some View {
         NavigationStack {

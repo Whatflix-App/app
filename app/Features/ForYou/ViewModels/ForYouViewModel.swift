@@ -4,14 +4,15 @@ import Combine
 @MainActor
 final class ForYouViewModel: ObservableObject {
     @Published var title = "For You"
+    @Published private(set) var recommendations: [Movie] = []
 
-    private let service: ForYouService
+    private let service: any ForYouServicing
 
-    init(service: ForYouService) {
+    init(service: any ForYouServicing) {
         self.service = service
     }
 
     func load() async {
-        _ = try? await service.fetchRecommendations()
+        recommendations = (try? await service.fetchRecommendations()) ?? []
     }
 }

@@ -7,37 +7,51 @@ struct AppRouter: View {
     var body: some View {
         Group {
             if !session.isAuthenticated {
-                LoginView(viewModel: LoginViewModel(authService: AuthService(apiClient: environment.apiClient)))
+                LoginView(viewModel: environment.makeLoginViewModel(session: session))
             } else if !session.hasCompletedOnboarding {
-                OnboardingView(viewModel: OnboardingViewModel(service: OnboardingService()))
+                OnboardingView(viewModel: environment.makeOnboardingViewModel(session: session))
             } else {
-                MainTabView(apiClient: environment.apiClient)
+                MainTabView(environment: environment)
             }
         }
     }
 }
 
 private struct MainTabView: View {
-    let apiClient: APIClient
+    let environment: AppEnvironment
+
+    @StateObject private var forYouViewModel: ForYouViewModel
+    @StateObject private var searchViewModel: SearchViewModel
+    @StateObject private var ratingsViewModel: RatingsViewModel
+    @StateObject private var catalogsViewModel: CatalogsViewModel
+    @StateObject private var watchlistViewModel: WatchlistViewModel
+    @StateObject private var profileViewModel: ProfileViewModel
+
+    init(environment: AppEnvironment) {
+        self.environment = environment
+        _forYouViewModel = StateObject(wrappedValue: environment.makeForYouViewModel())
+        _searchViewModel = StateObject(wrappedValue: environment.makeSearchViewModel())
+        _ratingsViewModel = StateObject(wrappedValue: environment.makeRatingsViewModel())
+        _catalogsViewModel = StateObject(wrappedValue: environment.makeCatalogsViewModel())
+        _watchlistViewModel = StateObject(wrappedValue: environment.makeWatchlistViewModel())
+        _profileViewModel = StateObject(wrappedValue: environment.makeProfileViewModel())
+    }
 
     var body: some View {
         TabView {
-            ForYouView(
-                viewModel: ForYouViewModel(service: ForYouService(apiClient: apiClient)),
-                searchViewModel: SearchViewModel(service: SearchService(apiClient: apiClient))
-            )
-            .tabItem { Label("For You", systemImage: "sparkles") }
+            ForYouView(viewModel: forYouViewModel, searchViewModel: searchViewModel)
+                .tabItem { Label("For You", systemImage: "sparkles") }
 
-            RatingsView(viewModel: RatingsViewModel(service: RatingsService(apiClient: apiClient)))
+            RatingsView(viewModel: ratingsViewModel)
                 .tabItem { Label("Ratings", systemImage: "star.leadinghalf.filled") }
 
-            CatalogsView(viewModel: CatalogsViewModel(service: CatalogsService(apiClient: apiClient)))
+            CatalogsView(viewModel: catalogsViewModel)
                 .tabItem { Label("Catalogs", systemImage: "books.vertical") }
 
-            WatchlistView(viewModel: WatchlistViewModel(service: WatchlistService(apiClient: apiClient)))
+            WatchlistView(viewModel: watchlistViewModel)
                 .tabItem { Label("Watchlist", systemImage: "bookmark") }
 
-            ProfileView(viewModel: ProfileViewModel(service: ProfileService(apiClient: apiClient)))
+            ProfileView(viewModel: profileViewModel)
                 .tabItem { Label("Profile", systemImage: "person") }
         }
     }

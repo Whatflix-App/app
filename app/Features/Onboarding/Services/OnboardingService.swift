@@ -1,6 +1,10 @@
 import Foundation
 
-final class OnboardingService {
+protocol OnboardingServicing {
+    func completeOnboarding()
+}
+
+final class OnboardingService: OnboardingServicing {
     func completeOnboarding() {
     }
 }

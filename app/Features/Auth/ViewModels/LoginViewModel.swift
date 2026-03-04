@@ -5,14 +5,25 @@ import Combine
 final class LoginViewModel: ObservableObject {
     @Published var credentials = LoginCredentials()
     @Published var title = "Login"
+    @Published var isLoading = false
 
-    private let authService: AuthService
+    private let authService: any AuthServicing
+    private let session: SessionStore
 
-    init(authService: AuthService) {
+    init(authService: any AuthServicing, session: SessionStore) {
         self.authService = authService
+        self.session = session
     }
 
     func login() async {
-        try? await authService.login(with: credentials)
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            try await authService.login(with: credentials)
+            session.isAuthenticated = true
+        } catch {
+            session.isAuthenticated = false
+        }
     }
 }

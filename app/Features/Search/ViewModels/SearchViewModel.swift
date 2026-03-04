@@ -4,14 +4,16 @@ import Combine
 @MainActor
 final class SearchViewModel: ObservableObject {
     @Published var title = "Movie Search"
+    @Published var query = ""
+    @Published private(set) var results: [Movie] = []
 
-    private let service: SearchService
+    private let service: any SearchServicing
 
-    init(service: SearchService) {
+    init(service: any SearchServicing) {
         self.service = service
     }
 
-    func runSearch(query: String) async {
-        _ = try? await service.search(query: query)
+    func runSearch() async {
+        results = (try? await service.search(query: query)) ?? []
     }
 }

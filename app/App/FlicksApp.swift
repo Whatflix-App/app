@@ -10,3 +10,7 @@ struct FlicksApp: App {
         }
     }
 }
+
+#Preview {
+    AppRouter(environment: .live)
+}

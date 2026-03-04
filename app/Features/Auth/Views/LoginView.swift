@@ -1,13 +1,22 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject var viewModel: LoginViewModel
+    @ObservedObject var viewModel: LoginViewModel
 
     var body: some View {
         NavigationStack {
-            Text(viewModel.title)
-                .font(FlicksTypography.screenTitle)
-                .navigationTitle("Auth")
+            VStack(spacing: 16) {
+                Text(viewModel.title)
+                    .font(FlicksTypography.screenTitle)
+
+                Button(viewModel.isLoading ? "Loading..." : "Continue") {
+                    Task { await viewModel.login() }
+                }
+                .buttonStyle(PrimaryButtonStyle())
+                .disabled(viewModel.isLoading)
+            }
+            .navigationTitle("Auth")
+            .padding()
         }
     }
 }

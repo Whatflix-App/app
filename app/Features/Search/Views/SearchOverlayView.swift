@@ -1,13 +1,28 @@
 import SwiftUI
 
 struct SearchOverlayView: View {
-    @StateObject var viewModel: SearchViewModel
+    @ObservedObject var viewModel: SearchViewModel
 
     var body: some View {
         NavigationStack {
-            Text(viewModel.title)
-                .font(FlicksTypography.screenTitle)
-                .navigationTitle("Search")
+            VStack(spacing: 16) {
+                Text(viewModel.title)
+                    .font(FlicksTypography.screenTitle)
+
+                TextField("Search movies", text: $viewModel.query)
+                    .textFieldStyle(.roundedBorder)
+
+                Button("Run Search") {
+                    Task { await viewModel.runSearch() }
+                }
+                .buttonStyle(PrimaryButtonStyle())
+
+                if let first = viewModel.results.first {
+                    Text(first.title)
+                }
+            }
+            .navigationTitle("Search")
+            .padding()
         }
     }
 }

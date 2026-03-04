@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RatingsView: View {
-    @StateObject var viewModel: RatingsViewModel
+    @ObservedObject var viewModel: RatingsViewModel
 
     var body: some View {
         NavigationStack {

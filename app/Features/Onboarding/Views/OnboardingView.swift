@@ -1,13 +1,21 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @StateObject var viewModel: OnboardingViewModel
+    @ObservedObject var viewModel: OnboardingViewModel
 
     var body: some View {
         NavigationStack {
-            Text(viewModel.title)
-                .font(FlicksTypography.screenTitle)
-                .navigationTitle("Welcome")
+            VStack(spacing: 16) {
+                Text(viewModel.title)
+                    .font(FlicksTypography.screenTitle)
+
+                Button("Finish") {
+                    viewModel.finish()
+                }
+                .buttonStyle(PrimaryButtonStyle())
+            }
+            .navigationTitle("Welcome")
+            .padding()
         }
     }
 }

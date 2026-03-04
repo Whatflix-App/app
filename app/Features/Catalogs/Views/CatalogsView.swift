@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CatalogsView: View {
-    @StateObject var viewModel: CatalogsViewModel
+    @ObservedObject var viewModel: CatalogsViewModel
 
     var body: some View {
         NavigationStack {
