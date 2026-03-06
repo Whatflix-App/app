@@ -18,6 +18,6 @@ final class ProfileViewModel: ObservableObject {
     }
 
     func logout() {
-        session.isAuthenticated = false
+        session.markLoggedOut()
     }
 }

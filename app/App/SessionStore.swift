@@ -5,4 +5,12 @@ import Combine
 final class SessionStore: ObservableObject {
     @Published var isAuthenticated = false
     @Published var hasCompletedOnboarding = false
+
+    func markAuthenticated() {
+        isAuthenticated = true
+    }
+
+    func markLoggedOut() {
+        isAuthenticated = false
+    }
 }

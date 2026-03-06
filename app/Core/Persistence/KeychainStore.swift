@@ -1,12 +1,41 @@
 import Foundation
+import Security
 
 final class KeychainStore {
     func save(_ value: String, for key: String) {
-        _ = (value, key)
+        guard let encoded = value.data(using: .utf8) else { return }
+
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecValueData as String: encoded
+        ]
+
+        SecItemDelete(query as CFDictionary)
+        SecItemAdd(query as CFDictionary, nil)
     }
 
     func read(for key: String) -> String? {
-        _ = key
-        return nil
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        guard status == errSecSuccess else { return nil }
+        guard let data = result as? Data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    func delete(for key: String) {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key
+        ]
+
+        SecItemDelete(query as CFDictionary)
     }
 }

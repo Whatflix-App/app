@@ -17,8 +17,8 @@ final class SearchService: SearchServicing {
     }
 
     func search(query: String) async throws -> [Movie] {
-        _ = query
-        let data = try await apiClient.send(Endpoint.search)
+        let path = "search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+        let data = try await apiClient.send(APIRequest(path: path, method: "GET"))
 
         if data.isEmpty {
             return [Movie(id: UUID(), title: "Movie Search")]
