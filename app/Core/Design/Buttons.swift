@@ -10,3 +10,14 @@ struct PrimaryButtonStyle: ButtonStyle {
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
+
+#Preview {
+    VStack(spacing: 12) {
+        Button("Primary Action") {}
+            .buttonStyle(PrimaryButtonStyle())
+        Button("Disabled") {}
+            .buttonStyle(PrimaryButtonStyle())
+            .disabled(true)
+    }
+    .padding()
+}

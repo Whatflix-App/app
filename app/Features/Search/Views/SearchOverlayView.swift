@@ -26,3 +26,7 @@ struct SearchOverlayView: View {
         }
     }
 }
+
+#Preview {
+    SearchOverlayView(viewModel: PreviewSupport.searchViewModel)
+}

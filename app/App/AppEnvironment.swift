@@ -2,19 +2,25 @@ import Foundation
 
 struct AppEnvironment {
     let apiClient: any APIClienting
+    let authTokenStore: AuthTokenStore
 
     static let live = AppEnvironment.wiredLive
 
-    init(apiClient: any APIClienting) {
+    init(apiClient: any APIClienting, authTokenStore: AuthTokenStore) {
         self.apiClient = apiClient
+        self.authTokenStore = authTokenStore
     }
 
     static var wiredLive: AppEnvironment {
-        AppEnvironment(apiClient: APIClient())
+        let tokenStore = AuthTokenStore()
+        return AppEnvironment(
+            apiClient: APIClient(tokenStore: tokenStore),
+            authTokenStore: tokenStore
+        )
     }
 
     func makeAuthService() -> AuthService {
-        AuthService(apiClient: apiClient)
+        AuthService(apiClient: apiClient, tokenStore: authTokenStore)
     }
 
     func makeLoginViewModel(session: SessionStore) -> LoginViewModel {
@@ -32,7 +38,7 @@ struct AppEnvironment {
     }
 
     func makeForYouViewModel() -> ForYouViewModel {
-        ForYouViewModel(service: ForYouService(apiClient: apiClient))
+        ForYouViewModel()
     }
 
     func makeSearchViewModel() -> SearchViewModel {
@@ -50,6 +56,7 @@ struct AppEnvironment {
     func makeProfileViewModel(session: SessionStore) -> ProfileViewModel {
         ProfileViewModel(
             service: ProfileService(apiClient: apiClient),
+            authService: makeAuthService(),
             session: session
         )
     }

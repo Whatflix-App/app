@@ -5,3 +5,7 @@ struct LoadingView: View {
         ProgressView("Loading")
     }
 }
+
+#Preview {
+    LoadingView()
+}

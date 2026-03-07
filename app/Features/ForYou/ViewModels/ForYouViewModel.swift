@@ -6,13 +6,21 @@ final class ForYouViewModel: ObservableObject {
     @Published var title = "For You"
     @Published private(set) var recommendations: [Movie] = []
 
-    private let service: any ForYouServicing
+    private var hasLoaded = false
 
-    init(service: any ForYouServicing) {
-        self.service = service
-    }
+    init() {}
 
     func load() async {
-        recommendations = (try? await service.fetchRecommendations()) ?? []
+        guard !hasLoaded else { return }
+        hasLoaded = true
+
+        recommendations = [
+            Movie(id: UUID(), title: "The Last Horizon"),
+            Movie(id: UUID(), title: "Midnight Protocol"),
+            Movie(id: UUID(), title: "Glass Ocean"),
+            Movie(id: UUID(), title: "Neon Harbor"),
+            Movie(id: UUID(), title: "Paper Satellites"),
+            Movie(id: UUID(), title: "Echo Archive"),
+        ]
     }
 }

@@ -1,6 +1,7 @@
 import Foundation
 
 struct Catalog: Identifiable {
-    let id: UUID
+    let id: String
     let name: String
+    let description: String?
 }

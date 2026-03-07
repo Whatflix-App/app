@@ -11,3 +11,8 @@ struct MovieRow: View {
         .padding(.vertical, 8)
     }
 }
+
+#Preview {
+    MovieRow(title: "The Midnight Line")
+        .padding()
+}

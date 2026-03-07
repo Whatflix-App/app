@@ -1,6 +1,7 @@
 import Foundation
 
 struct User: Identifiable {
-    let id: UUID
-    let displayName: String
+    let id: String
+    let email: String?
+    let displayName: String?
 }

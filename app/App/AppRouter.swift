@@ -53,3 +53,14 @@ private struct MainTabView: View {
         }
     }
 }
+
+#Preview("App Router") {
+    AppRouter(environment: PreviewSupport.environment)
+}
+
+#Preview("Main Tabs") {
+    MainTabView(
+        environment: PreviewSupport.environment,
+        session: PreviewSupport.session
+    )
+}

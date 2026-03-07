@@ -5,9 +5,18 @@ struct MovieCardFullScreenView: View {
 
     var body: some View {
         NavigationStack {
-            Text(viewModel.fullScreenTitle)
-                .font(FlicksTypography.screenTitle)
-                .navigationTitle("Movie Card")
+            VStack {
+                MoviePosterSheetCard(
+                    title: viewModel.fullScreenTitle,
+                    detailTitle: viewModel.detailPopupTitle
+                )
+            }
+            .padding()
+            .navigationTitle("Movie Card")
         }
     }
+}
+
+#Preview {
+    MovieCardFullScreenView(viewModel: PreviewSupport.movieDetailViewModel)
 }

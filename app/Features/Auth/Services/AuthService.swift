@@ -3,14 +3,18 @@ import UIKit
 
 protocol AuthServicing {
     func loginWithApple(identityToken: String, authorizationCode: String) async throws -> AuthSuccessResponse
+    func refreshIfPossible() async throws -> RefreshResponsePayload
+    func logout() async
     func pingBackend() async throws
 }
 
 final class AuthService: AuthServicing {
     private let apiClient: any APIClienting
+    private let tokenStore: AuthTokenStore
 
-    init(apiClient: any APIClienting) {
+    init(apiClient: any APIClienting, tokenStore: AuthTokenStore) {
         self.apiClient = apiClient
+        self.tokenStore = tokenStore
     }
 
     func loginWithApple(identityToken: String, authorizationCode: String) async throws -> AuthSuccessResponse {
@@ -22,11 +26,43 @@ final class AuthService: AuthServicing {
         )
 
         let data = try await apiClient.send(try Endpoint.appleLogin(payload))
-        return try decode(AuthSuccessResponse.self, from: data)
+        let response = try decode(AuthSuccessResponse.self, from: data)
+        persistTokens(from: response)
+        return response
+    }
+
+    func refreshIfPossible() async throws -> RefreshResponsePayload {
+        guard let refreshToken = tokenStore.refreshToken(), let sessionID = tokenStore.sessionID() else {
+            throw NetworkError.unauthorized
+        }
+
+        let payload = RefreshRequestPayload(refreshToken: refreshToken, sessionId: sessionID)
+        let data = try await apiClient.send(try Endpoint.refresh(payload))
+        let response = try decode(RefreshResponsePayload.self, from: data)
+        tokenStore.updateAccessToken(response.tokens.accessToken)
+        tokenStore.updateRefreshToken(response.tokens.refreshToken)
+        return response
+    }
+
+    func logout() async {
+        if let refreshToken = tokenStore.refreshToken(), let sessionID = tokenStore.sessionID() {
+            let payload = LogoutRequestPayload(refreshToken: refreshToken, sessionId: sessionID)
+            _ = try? await apiClient.send(try Endpoint.logout(payload))
+        }
+
+        tokenStore.clear()
     }
 
     func pingBackend() async throws {
         _ = try await apiClient.send(Endpoint.health)
+    }
+
+    private func persistTokens(from response: AuthSuccessResponse) {
+        tokenStore.save(
+            accessToken: response.tokens.accessToken,
+            refreshToken: response.tokens.refreshToken,
+            sessionID: response.session.id
+        )
     }
 
     private func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {

@@ -60,8 +60,5 @@ struct LoginView: View {
 }
 
 #Preview {
-    let environment = AppEnvironment.live
-    let session = SessionStore()
-    let viewModel = environment.makeLoginViewModel(session: session)
-    return LoginView(viewModel: viewModel)
+    LoginView(viewModel: PreviewSupport.loginViewModel)
 }

@@ -19,3 +19,7 @@ struct OnboardingView: View {
         }
     }
 }
+
+#Preview {
+    OnboardingView(viewModel: PreviewSupport.onboardingViewModel)
+}

@@ -9,3 +9,8 @@ struct EmptyStateView: View {
             .foregroundStyle(.secondary)
     }
 }
+
+#Preview {
+    EmptyStateView(title: "No saved movies yet")
+        .padding()
+}

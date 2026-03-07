@@ -14,3 +14,14 @@ extension View {
         modifier(FlicksCardModifier())
     }
 }
+
+#Preview {
+    VStack(alignment: .leading, spacing: 8) {
+        Text("Featured")
+            .font(FlicksTypography.screenTitle)
+        Text("A sample card using the shared visual modifier.")
+            .font(FlicksTypography.body)
+    }
+    .flicksCardStyle()
+    .padding()
+}

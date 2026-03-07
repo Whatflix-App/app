@@ -105,5 +105,3 @@ final class LoginViewModel: ObservableObject {
         return "Sign in failed: \(error.localizedDescription)"
     }
 }
-
-

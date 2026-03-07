@@ -7,13 +7,16 @@ protocol APIClienting {
 final class APIClient: APIClienting {
     private let baseURL: URL
     private let session: URLSession
+    private let tokenStore: AuthTokenStore
 
     init(
-        baseURL: URL = URL(string: "http://192.168.4.119:8000")!,
-        session: URLSession = .shared
+        baseURL: URL = URL(string: "https://api.shamikkarkhanis.me")!,
+        session: URLSession = .shared,
+        tokenStore: AuthTokenStore = AuthTokenStore()
     ) {
         self.baseURL = baseURL
         self.session = session
+        self.tokenStore = tokenStore
     }
 
     func send(_ request: APIRequest) async throws -> Data {
@@ -34,6 +37,10 @@ final class APIClient: APIClienting {
 
         if request.body != nil && request.headers["Content-Type"] == nil {
             urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+
+        if request.requiresAuth, let accessToken = tokenStore.accessToken {
+            urlRequest.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
 
         let (data, response) = try await session.data(for: urlRequest)

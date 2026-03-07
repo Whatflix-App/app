@@ -7,16 +7,26 @@ struct LoginViewModelTests {
     @Test func appleLoginSuccessSetsAuthenticated() async {
         let apiClient = MockAPIClient()
         let session = SessionStore()
+        let tokenStore = AuthTokenStore()
         let viewModel = LoginViewModel(
-            authService: AuthService(apiClient: apiClient),
+            authService: AuthService(apiClient: apiClient, tokenStore: tokenStore),
             session: session
         )
 
         let payload = AuthSuccessResponse(
             user: AuthUserPayload(id: "usr_1", email: "user@example.com", displayName: "User", authProvider: "apple"),
+            tokens: AuthTokensPayload(
+                accessToken: "token",
+                accessTokenExpiresAt: Date(),
+                refreshToken: "refresh",
+                refreshTokenExpiresAt: Date().addingTimeInterval(3600)
+            ),
+            session: AuthSessionPayload(id: "sess_1", issuedAt: Date()),
             isNewUser: false
         )
-        apiClient.nextData = try! JSONEncoder().encode(payload)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        apiClient.nextData = try! encoder.encode(payload)
 
         await viewModel.loginWithApple(identityToken: "header.payload.sig", authorizationCode: "code")
 
@@ -28,8 +38,9 @@ struct LoginViewModelTests {
         apiClient.nextError = NetworkError.requestFailed
 
         let session = SessionStore()
+        let tokenStore = AuthTokenStore()
         let viewModel = LoginViewModel(
-            authService: AuthService(apiClient: apiClient),
+            authService: AuthService(apiClient: apiClient, tokenStore: tokenStore),
             session: session
         )
 

@@ -5,6 +5,9 @@
 *.swp
 *~
 
+# Depreciated files
+Depreciated
+
 # Xcode user/state
 xcuserdata/
 *.xcuserstate
@@ -12,6 +15,7 @@ xcuserdata/
 
 # Build outputs
 build/
+DerivedDataLocal/
 DerivedData/
 *.ipa
 *.dSYM.zip
