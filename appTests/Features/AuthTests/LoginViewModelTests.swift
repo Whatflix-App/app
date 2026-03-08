@@ -28,7 +28,7 @@ struct LoginViewModelTests {
         encoder.dateEncodingStrategy = .iso8601
         apiClient.nextData = try! encoder.encode(payload)
 
-        await viewModel.loginWithApple(identityToken: "header.payload.sig", authorizationCode: "code")
+        await viewModel.loginWithApple(identityToken: "header.payload.sig", authorizationCode: "code", fullName: "Test User")
 
         #expect(session.isAuthenticated)
     }
@@ -44,7 +44,7 @@ struct LoginViewModelTests {
             session: session
         )
 
-        await viewModel.loginWithApple(identityToken: "header.payload.sig", authorizationCode: "code")
+        await viewModel.loginWithApple(identityToken: "header.payload.sig", authorizationCode: "code", fullName: "Test User")
 
         #expect(!session.isAuthenticated)
     }

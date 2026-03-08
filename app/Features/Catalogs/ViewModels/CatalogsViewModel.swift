@@ -9,15 +9,19 @@ final class CatalogsViewModel: ObservableObject {
     @Published var errorMessage: String?
 
     private let service: CatalogsService
+    private let catalogState: CatalogState?
 
-    init(service: CatalogsService) {
+    init(service: CatalogsService, catalogState: CatalogState? = nil) {
         self.service = service
+        self.catalogState = catalogState
     }
 
     func load() async {
         isLoading = true
         defer { isLoading = false }
-        catalogs = (try? await service.fetchCatalogs()) ?? []
+        let loaded = (try? await service.fetchCatalogs()) ?? []
+        catalogs = loaded
+        catalogState?.sync(with: loaded)
     }
 
     func createCatalog(name: String, description: String?, isPublic: Bool) async {
@@ -30,6 +34,7 @@ final class CatalogsViewModel: ObservableObject {
                 description: description?.trimmingCharacters(in: .whitespacesAndNewlines)
             )
             catalogs.insert(catalog, at: 0)
+            catalogState?.addOrUpdate(catalog: catalog)
         } catch {
             errorMessage = "Failed to create catalog"
         }
@@ -41,6 +46,7 @@ final class CatalogsViewModel: ObservableObject {
             let ok = try await service.deleteCatalog(id: id)
             if ok {
                 catalogs.removeAll { $0.id == id }
+                catalogState?.remove(catalogID: id)
             }
             return ok
         } catch {

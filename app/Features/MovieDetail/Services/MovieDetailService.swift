@@ -9,6 +9,6 @@ final class MovieDetailService {
 
     func fetchMovieDetail(id: UUID) async throws -> Movie {
         _ = (apiClient, id)
-        return Movie(id: UUID(), title: "Movie Detail")
+        return Movie(id: UUID(), title: "Movie Detail", overview: "Movie Overview")
     }
 }

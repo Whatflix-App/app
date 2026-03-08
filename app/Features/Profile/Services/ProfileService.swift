@@ -5,6 +5,7 @@ final class ProfileService {
         let id: String
         let email: String?
         let displayName: String?
+        let fullName: String?
     }
 
     private let apiClient: any APIClienting
@@ -18,7 +19,12 @@ final class ProfileService {
         let decoder = JSONDecoder()
         do {
             let decoded = try decoder.decode(ProfileDTO.self, from: data)
-            return User(id: decoded.id, email: decoded.email, displayName: decoded.displayName)
+            return User(
+                id: decoded.id,
+                email: decoded.email,
+                displayName: decoded.displayName,
+                fullName: decoded.fullName
+            )
         } catch {
             throw NetworkError.decodingFailed
         }
@@ -29,7 +35,12 @@ final class ProfileService {
         let decoder = JSONDecoder()
         do {
             let decoded = try decoder.decode(ProfileDTO.self, from: data)
-            return User(id: decoded.id, email: decoded.email, displayName: decoded.displayName)
+            return User(
+                id: decoded.id,
+                email: decoded.email,
+                displayName: decoded.displayName,
+                fullName: decoded.fullName
+            )
         } catch {
             throw NetworkError.decodingFailed
         }

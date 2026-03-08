@@ -6,6 +6,7 @@ final class CatalogsService {
         let name: String
         let description: String?
         let isPublic: Bool
+        let movieIds: [String]?
     }
 
     private struct RemoveCatalogResponseDTO: Decodable {
@@ -27,7 +28,8 @@ final class CatalogsService {
                 Catalog(
                     id: $0.id,
                     name: $0.name,
-                    description: $0.description
+                    description: $0.description,
+                    movieIds: $0.movieIds ?? []
                 )
             }
         } catch {
@@ -45,7 +47,8 @@ final class CatalogsService {
             return Catalog(
                 id: decoded.id,
                 name: decoded.name,
-                description: decoded.description
+                description: decoded.description,
+                movieIds: decoded.movieIds ?? []
             )
         } catch {
             throw NetworkError.decodingFailed

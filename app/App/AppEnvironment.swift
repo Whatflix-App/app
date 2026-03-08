@@ -49,8 +49,30 @@ struct AppEnvironment {
         CatalogsViewModel(service: CatalogsService(apiClient: apiClient))
     }
 
+    func makeCatalogState() -> CatalogState {
+        CatalogState()
+    }
+
+    func makeCatalogsViewModel(catalogState: CatalogState) -> CatalogsViewModel {
+        CatalogsViewModel(
+            service: CatalogsService(apiClient: apiClient),
+            catalogState: catalogState
+        )
+    }
+
     func makeWatchlistViewModel() -> WatchlistViewModel {
         WatchlistViewModel(service: WatchlistService(apiClient: apiClient))
+    }
+
+    func makeWatchlistState() -> WatchlistState {
+        WatchlistState(service: WatchlistService(apiClient: apiClient))
+    }
+
+    func makeWatchlistViewModel(watchlistState: WatchlistState) -> WatchlistViewModel {
+        WatchlistViewModel(
+            service: WatchlistService(apiClient: apiClient),
+            watchlistState: watchlistState
+        )
     }
 
     func makeProfileViewModel(session: SessionStore) -> ProfileViewModel {

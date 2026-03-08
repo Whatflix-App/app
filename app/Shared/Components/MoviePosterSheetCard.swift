@@ -24,7 +24,7 @@ struct MoviePosterSheetCard: View {
                 }
                 .padding()
                 .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+                .presentationDragIndicator(.visible)    
             }
     }
 }

@@ -17,7 +17,7 @@ final class LoginViewModel: ObservableObject {
         self.session = session
     }
 
-    func loginWithApple(identityToken: String, authorizationCode: String) async {
+    func loginWithApple(identityToken: String, authorizationCode: String, fullName: String?) async {
         isLoading = true
         errorMessage = nil
         debugState = "Calling backend /auth/apple..."
@@ -26,7 +26,8 @@ final class LoginViewModel: ObservableObject {
         do {
             _ = try await authService.loginWithApple(
                 identityToken: identityToken,
-                authorizationCode: authorizationCode
+                authorizationCode: authorizationCode,
+                fullName: fullName
             )
             session.markAuthenticated()
             debugState = "Login succeeded"

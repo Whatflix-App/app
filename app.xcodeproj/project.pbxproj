@@ -30,11 +30,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		607D22312F5CAAED00FC2C54 /* Depreciated */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Depreciated;
-			sourceTree = "<group>";
-		};
 		609E1C802F577B5F0098B530 /* app */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = app;
@@ -48,6 +43,11 @@
 		609E1C982F577B600098B530 /* appUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = appUITests;
+			sourceTree = "<group>";
+		};
+		60DD54832F5CD3E00041733B /* Depreciated */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Depreciated;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -80,7 +80,7 @@
 		609E1C752F577B5F0098B530 = {
 			isa = PBXGroup;
 			children = (
-				607D22312F5CAAED00FC2C54 /* Depreciated */,
+				60DD54832F5CD3E00041733B /* Depreciated */,
 				609E1C802F577B5F0098B530 /* app */,
 				609E1C8E2F577B600098B530 /* appTests */,
 				609E1C982F577B600098B530 /* appUITests */,
@@ -114,7 +114,6 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				607D22312F5CAAED00FC2C54 /* Depreciated */,
 				609E1C802F577B5F0098B530 /* app */,
 			);
 			name = app;

@@ -8,17 +8,29 @@ struct CatalogListView: View {
     @State private var showingDeleteConfirm = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            ScrollView(.vertical, showsIndicators: true) {
-                VStack(spacing: 16) {
-                    ForEach(0..<previewCount, id: \.self) { _ in
-                        MovieCardPreview()
+        ZStack {
+            AppStyle.brandGradient
+                .ignoresSafeArea()
+
+            ScrollView(.vertical) {
+                VStack(spacing: 20) {
+                    ForEach(0..<previewCount, id: \.self) { index in
+                        MovieCardPreview(
+                            title: "\(catalog.name) Movie \(index + 1)",
+                            subtitle: "From this catalog",
+                            imageName: nil,
+                            dateAdded: Date(),
+                            cornerRadius: 20,
+                            aspectRatio: 16 / 9,
+                            showBorder: false
+                        )
                     }
                 }
                 .padding(.horizontal)
+                .padding(.vertical, 16)
             }
+            .scrollIndicators(.hidden)
         }
-        .padding(.vertical)
         .navigationTitle(catalog.name)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

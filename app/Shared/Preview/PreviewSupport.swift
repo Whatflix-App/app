@@ -35,12 +35,20 @@ enum PreviewSupport {
         service: SearchService(apiClient: apiClient)
     )
 
+    static let catalogState = CatalogState()
+
     static let catalogsViewModel = CatalogsViewModel(
-        service: CatalogsService(apiClient: apiClient)
+        service: CatalogsService(apiClient: apiClient),
+        catalogState: catalogState
+    )
+
+    static let watchlistState = WatchlistState(
+        service: WatchlistService(apiClient: apiClient)
     )
 
     static let watchlistViewModel = WatchlistViewModel(
-        service: WatchlistService(apiClient: apiClient)
+        service: WatchlistService(apiClient: apiClient),
+        watchlistState: watchlistState
     )
 
     static let profileViewModel = ProfileViewModel(
@@ -62,8 +70,8 @@ private struct PreviewAPIClient: APIClienting {
 }
 
 private struct PreviewAuthService: AuthServicing {
-    func loginWithApple(identityToken: String, authorizationCode: String) async throws -> AuthSuccessResponse {
-        _ = (identityToken, authorizationCode)
+    func loginWithApple(identityToken: String, authorizationCode: String, fullName: String?) async throws -> AuthSuccessResponse {
+        _ = (identityToken, authorizationCode, fullName)
         return AuthSuccessResponse(
             user: AuthUserPayload(
                 id: UUID().uuidString,

@@ -5,6 +5,7 @@ import Combine
 final class ProfileViewModel: ObservableObject {
     @Published var title = "Profile"
     @Published var displayName = "Loading..."
+    @Published var fullName = ""
     @Published var email = ""
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -27,6 +28,7 @@ final class ProfileViewModel: ObservableObject {
         do {
             let user = try await service.fetchProfile()
             displayName = user.displayName ?? "User"
+            fullName = user.fullName ?? ""
             email = user.email ?? ""
         } catch {
             errorMessage = "Failed to load profile"

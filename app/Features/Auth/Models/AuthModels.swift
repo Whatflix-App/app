@@ -10,6 +10,7 @@ struct AppleLoginRequest: Codable {
     let provider: String
     let identityToken: String
     let authorizationCode: String
+    let fullName: String?
     let device: DevicePayload
 }
 

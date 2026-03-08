@@ -15,12 +15,12 @@ final class ForYouViewModel: ObservableObject {
         hasLoaded = true
 
         recommendations = [
-            Movie(id: UUID(), title: "The Last Horizon"),
-            Movie(id: UUID(), title: "Midnight Protocol"),
-            Movie(id: UUID(), title: "Glass Ocean"),
-            Movie(id: UUID(), title: "Neon Harbor"),
-            Movie(id: UUID(), title: "Paper Satellites"),
-            Movie(id: UUID(), title: "Echo Archive"),
+            Movie(id: UUID(), title: "The Last Horizon", overview: "An expedition crew searches for a habitable world beyond mapped space."),
+            Movie(id: UUID(), title: "Midnight Protocol", overview: "A covert team races to stop a digital attack before dawn."),
+            Movie(id: UUID(), title: "Glass Ocean", overview: "A survival drama aboard a research vessel trapped in unstable waters."),
+            Movie(id: UUID(), title: "Neon Harbor", overview: "A crime thriller set in a futuristic port city with shifting alliances."),
+            Movie(id: UUID(), title: "Paper Satellites", overview: "A coming-of-age sci-fi story about friends building signals to the stars."),
+            Movie(id: UUID(), title: "Echo Archive", overview: "A memory-tech mystery where deleted histories begin to reappear."),
         ]
     }
 }

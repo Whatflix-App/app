@@ -22,34 +22,53 @@ private struct MainTabView: View {
     let session: SessionStore
 
     @StateObject private var forYouViewModel: ForYouViewModel
-    @StateObject private var searchViewModel: SearchViewModel
+    @State private var searchViewModel: SearchViewModel
+    @StateObject private var catalogState: CatalogState
     @StateObject private var catalogsViewModel: CatalogsViewModel
+    @StateObject private var watchlistState: WatchlistState
     @StateObject private var watchlistViewModel: WatchlistViewModel
     @StateObject private var profileViewModel: ProfileViewModel
 
     init(environment: AppEnvironment, session: SessionStore) {
         self.environment = environment
         self.session = session
+        let sharedCatalogState = environment.makeCatalogState()
+        let sharedWatchlistState = environment.makeWatchlistState()
         _forYouViewModel = StateObject(wrappedValue: environment.makeForYouViewModel())
-        _searchViewModel = StateObject(wrappedValue: environment.makeSearchViewModel())
-        _catalogsViewModel = StateObject(wrappedValue: environment.makeCatalogsViewModel())
-        _watchlistViewModel = StateObject(wrappedValue: environment.makeWatchlistViewModel())
+        _searchViewModel = State(wrappedValue: environment.makeSearchViewModel())
+        _catalogState = StateObject(wrappedValue: sharedCatalogState)
+        _catalogsViewModel = StateObject(
+            wrappedValue: environment.makeCatalogsViewModel(catalogState: sharedCatalogState)
+        )
+        _watchlistState = StateObject(wrappedValue: sharedWatchlistState)
+        _watchlistViewModel = StateObject(
+            wrappedValue: environment.makeWatchlistViewModel(watchlistState: sharedWatchlistState)
+        )
         _profileViewModel = StateObject(wrappedValue: environment.makeProfileViewModel(session: session))
     }
 
     var body: some View {
         TabView {
-            ForYouView(viewModel: forYouViewModel, searchViewModel: searchViewModel)
-                .tabItem { Label("For You", systemImage: "sparkles") }
+//            ForYouView(viewModel: forYouViewModel, searchViewModel: searchViewModel)
+//                .tabItem { Label("For You", systemImage: "sparkles") }
 
-            CatalogsView(viewModel: catalogsViewModel)
-                .tabItem { Label("Catalogs", systemImage: "books.vertical") }
-
-            WatchlistView(viewModel: watchlistViewModel)
+            WatchlistView(
+                viewModel: watchlistViewModel,
+                searchViewModel: searchViewModel,
+                watchlistState: watchlistState
+            )
                 .tabItem { Label("Watchlist", systemImage: "bookmark") }
+            
+//            CatalogsView(viewModel: catalogsViewModel)
+//                .tabItem { Label("Catalogs", systemImage: "books.vertical") }
+
+           
 
             ProfileView(viewModel: profileViewModel)
                 .tabItem { Label("Profile", systemImage: "person") }
+        }
+        .task {
+            await watchlistState.refresh()
         }
     }
 }

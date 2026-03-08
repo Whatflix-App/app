@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 
 protocol AuthServicing {
-    func loginWithApple(identityToken: String, authorizationCode: String) async throws -> AuthSuccessResponse
+    func loginWithApple(identityToken: String, authorizationCode: String, fullName: String?) async throws -> AuthSuccessResponse
     func refreshIfPossible() async throws -> RefreshResponsePayload
     func logout() async
     func pingBackend() async throws
@@ -17,11 +17,12 @@ final class AuthService: AuthServicing {
         self.tokenStore = tokenStore
     }
 
-    func loginWithApple(identityToken: String, authorizationCode: String) async throws -> AuthSuccessResponse {
+    func loginWithApple(identityToken: String, authorizationCode: String, fullName: String?) async throws -> AuthSuccessResponse {
         let payload = AppleLoginRequest(
             provider: "apple",
             identityToken: identityToken,
             authorizationCode: authorizationCode,
+            fullName: fullName,
             device: devicePayload()
         )
 

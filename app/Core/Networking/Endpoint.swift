@@ -16,6 +16,32 @@ enum Endpoint {
     static let health = APIRequest(path: "health", method: "GET")
     static let profile = APIRequest(path: "profile", method: "GET", requiresAuth: true)
     static let catalogs = APIRequest(path: "catalogs", method: "GET", requiresAuth: true)
+    static let watchlist = APIRequest(path: "watchlist", method: "GET", requiresAuth: true)
+
+    static func searchMovies(
+        query: String,
+        page: Int = 1,
+        includeAdult: Bool = false,
+        language: String = "en-US"
+    ) -> APIRequest {
+        var components = URLComponents()
+        components.path = "search/movies"
+        components.queryItems = [
+            URLQueryItem(name: "q", value: query),
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "includeAdult", value: includeAdult ? "true" : "false"),
+            URLQueryItem(name: "language", value: language),
+        ]
+        let queryString = components.percentEncodedQuery ?? ""
+        return APIRequest(path: "search/movies?\(queryString)", method: "GET", requiresAuth: true)
+    }
+
+    static func searchMovieByID(_ movieID: String, language: String = "en-US") -> APIRequest {
+        var components = URLComponents()
+        components.queryItems = [URLQueryItem(name: "language", value: language)]
+        let queryString = components.percentEncodedQuery ?? ""
+        return APIRequest(path: "search/movies/\(movieID)?\(queryString)", method: "GET", requiresAuth: true)
+    }
 
     static func createCatalog(name: String, description: String?) throws -> APIRequest {
         struct Payload: Codable {
@@ -37,6 +63,21 @@ enum Endpoint {
 
     static func deleteWatchlistItem(movieID: String) -> APIRequest {
         APIRequest(path: "watchlist/\(movieID)", method: "DELETE", requiresAuth: true)
+    }
+
+    static func addWatchlistItem(movieID: String, notes: String? = nil, priority: Int? = nil) throws -> APIRequest {
+        struct Payload: Codable {
+            let movieId: String
+            let notes: String?
+            let priority: Int?
+        }
+
+        return APIRequest(
+            path: "watchlist",
+            method: "POST",
+            body: try JSONEncoder().encode(Payload(movieId: movieID, notes: notes, priority: priority)),
+            requiresAuth: true
+        )
     }
 
     static func updateProfile(displayName: String?) throws -> APIRequest {

@@ -4,8 +4,8 @@ import Testing
 @MainActor
 struct ProfileViewModelTests {
     private struct MockAuthService: AuthServicing {
-        func loginWithApple(identityToken: String, authorizationCode: String) async throws -> AuthSuccessResponse {
-            _ = (identityToken, authorizationCode)
+        func loginWithApple(identityToken: String, authorizationCode: String, fullName: String?) async throws -> AuthSuccessResponse {
+            _ = (identityToken, authorizationCode, fullName)
             throw NetworkError.requestFailed
         }
 

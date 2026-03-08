@@ -3,4 +3,42 @@ import Foundation
 struct Movie: Identifiable, Hashable {
     let id: UUID
     let title: String
+    let overview: String
+    let genres: [String]
+    let movieId: String?
+    let backdropPath: String?
+    let releaseDate: String?
+    let voteAverage: Double?
+    let voteCount: Int?
+    let popularity: Double?
+    let adult: Bool?
+    let originalLanguage: String?
+
+    init(
+        id: UUID,
+        title: String,
+        overview: String,
+        genres: [String] = [],
+        movieId: String? = nil,
+        backdropPath: String? = nil,
+        releaseDate: String? = nil,
+        voteAverage: Double? = nil,
+        voteCount: Int? = nil,
+        popularity: Double? = nil,
+        adult: Bool? = nil,
+        originalLanguage: String? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.overview = overview
+        self.genres = genres
+        self.movieId = movieId
+        self.backdropPath = backdropPath
+        self.releaseDate = releaseDate
+        self.voteAverage = voteAverage
+        self.voteCount = voteCount
+        self.popularity = popularity
+        self.adult = adult
+        self.originalLanguage = originalLanguage
+    }
 }
