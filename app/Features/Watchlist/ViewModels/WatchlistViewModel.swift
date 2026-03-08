@@ -5,6 +5,7 @@ import Combine
 final class WatchlistViewModel: ObservableObject {
     @Published var title = "Watchlist"
     @Published private(set) var items: [Movie] = []
+    @Published private(set) var isLoading = false
 
     private let service: WatchlistService
     private let watchlistState: WatchlistState?
@@ -15,6 +16,10 @@ final class WatchlistViewModel: ObservableObject {
     }
 
     func load() async {
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+
         let loaded = (try? await service.fetchWatchlist()) ?? []
         items = loaded
         watchlistState?.sync(with: loaded)

@@ -15,7 +15,11 @@ struct WatchlistView: View {
 
                 ScrollView(.vertical) {
                     VStack(spacing: 20) {
-                        if viewModel.items.isEmpty {
+                        if viewModel.isLoading && viewModel.items.isEmpty {
+                            ForEach(0..<4, id: \.self) { _ in
+                                WatchlistSkeletonCard()
+                            }
+                        } else if viewModel.items.isEmpty {
                             EmptyStateView(title: "Start saving movies.")
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.top, 48)
@@ -72,8 +76,8 @@ struct WatchlistView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 24)
+                    .padding(.horizontal, 30)
+                    .padding(.bottom, 0)
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
@@ -90,6 +94,48 @@ struct WatchlistView: View {
                 viewModel.pruneItems(keeping: watchlistState.movieIDs)
             }
         }
+    }
+}
+
+private struct WatchlistSkeletonCard: View {
+    @State private var shimmerOffset: CGFloat = -220
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .fill(Color.white.opacity(0.14))
+            .aspectRatio(16 / 9, contentMode: .fit)
+            .overlay {
+                VStack(alignment: .leading, spacing: 8) {
+                    Spacer()
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.white.opacity(0.2))
+                        .frame(width: 180, height: 18)
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.white.opacity(0.15))
+                        .frame(width: 240, height: 14)
+                }
+                .padding(14)
+            }
+            .overlay {
+                LinearGradient(
+                    colors: [
+                        .white.opacity(0.0),
+                        .white.opacity(0.22),
+                        .white.opacity(0.0)
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: 120)
+                .offset(x: shimmerOffset)
+                .blendMode(.screen)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .onAppear {
+                withAnimation(.linear(duration: 1.1).repeatForever(autoreverses: false)) {
+                    shimmerOffset = 220
+                }
+            }
     }
 }
 
