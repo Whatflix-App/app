@@ -46,17 +46,39 @@ struct WatchlistView: View {
                     .padding(.vertical, 16)
                 }
                 .scrollIndicators(.hidden)
-            }
-            .navigationTitle(viewModel.title)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showsSearch = true
-                    } label: {
-                        Image(systemName: "plus")
+
+                LinearGradient(
+                    colors: [.clear, .black.opacity(0.45)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 130)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .ignoresSafeArea(edges: .bottom)
+                .allowsHitTesting(false)
+
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button {
+                            showsSearch = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 60, height: 60)
+                                .glassEffect(in: Circle())
+                        }
+                        .buttonStyle(.plain)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
                 }
             }
+            .toolbar(.hidden, for: .navigationBar)
+            .toolbarBackground(FlicksColors.background, for: .tabBar)
+            .toolbarBackground(.visible, for: .tabBar)
             .navigationDestination(isPresented: $showsSearch) {
                 SearchOverlayView(viewModel: searchViewModel, watchlistState: watchlistState)
                     .onDisappear {

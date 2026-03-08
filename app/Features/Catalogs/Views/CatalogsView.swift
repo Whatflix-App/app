@@ -16,11 +16,6 @@ struct CatalogsView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                Text(viewModel.title)
-                    .font(FlicksTypography.screenTitle)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .font(.footnote)

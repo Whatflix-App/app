@@ -40,6 +40,7 @@ struct MovieCardPreview: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             mediaView
+                .background(Color(white: 0.2))
                 .overlay(alignment: .topTrailing) {
                     if let dateAdded {
                         Text(dateAdded.watchLabel)
@@ -118,7 +119,7 @@ struct MovieCardPreview: View {
     }
 
     private var placeholder: some View {
-        AppStyle.brandGradient
+        Color(white: 0.2)
             .overlay {
                 Image(systemName: "film")
                     .font(.system(size: 30, weight: .semibold))

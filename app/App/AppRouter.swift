@@ -8,8 +8,6 @@ struct AppRouter: View {
         Group {
             if !session.isAuthenticated {
                 LoginView(viewModel: environment.makeLoginViewModel(session: session))
-            } else if !session.hasCompletedOnboarding {
-                OnboardingView(viewModel: environment.makeOnboardingViewModel(session: session))
             } else {
                 MainTabView(environment: environment, session: session)
             }
