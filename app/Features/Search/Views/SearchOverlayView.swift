@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SearchOverlayView: View {
+struct SearchView: View {
     @ObservedObject var viewModel: SearchViewModel
     @ObservedObject var watchlistState: WatchlistState
     @FocusState private var isSearchFieldFocused: Bool
@@ -80,7 +80,7 @@ struct SearchOverlayView: View {
 }
 
 #Preview {
-    SearchOverlayView(
+    SearchView(
         viewModel: PreviewSupport.searchViewModel,
         watchlistState: PreviewSupport.watchlistState
     )

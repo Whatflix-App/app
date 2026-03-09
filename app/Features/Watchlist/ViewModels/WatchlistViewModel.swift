@@ -4,6 +4,7 @@ import Combine
 @MainActor
 final class WatchlistViewModel: ObservableObject {
     @Published var title = "Watchlist"
+    @Published var errorMessage: String?
     @Published private(set) var items: [Movie] = []
     @Published private(set) var isLoading = false
 
@@ -26,6 +27,7 @@ final class WatchlistViewModel: ObservableObject {
     }
 
     func delete(movie: Movie) async {
+        errorMessage = nil
         do {
             if let movieID = movie.movieId {
                 try await service.deleteWatchlistItem(movieID: movieID)
@@ -35,6 +37,7 @@ final class WatchlistViewModel: ObservableObject {
             }
             items.removeAll { $0.id == movie.id }
         } catch {
+            errorMessage = "Failed to remove \"\(movie.title)\". Please try again."
         }
     }
 

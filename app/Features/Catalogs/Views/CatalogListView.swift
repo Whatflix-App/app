@@ -3,60 +3,76 @@ import SwiftUI
 struct CatalogListView: View {
     let catalog: Catalog
     @ObservedObject var viewModel: CatalogsViewModel
-    private let previewCount = 12
+    @State private var previewItems: [CatalogListPreviewItem]
     @Environment(\.dismiss) private var dismiss
     @State private var showingDeleteConfirm = false
+
+    init(catalog: Catalog, viewModel: CatalogsViewModel) {
+        self.catalog = catalog
+        self.viewModel = viewModel
+        _previewItems = State(initialValue: CatalogListPreviewItem.samples(prefix: catalog.name))
+    }
 
     var body: some View {
         ZStack {
             AppStyle.brandGradient
                 .ignoresSafeArea()
 
-            ScrollView(.vertical) {
-                VStack(spacing: 20) {
-                    ForEach(0..<previewCount, id: \.self) { index in
-                        MovieCardPreview(
-                            title: "\(catalog.name) Movie \(index + 1)",
-                            subtitle: "From this catalog",
-                            imageName: nil,
-                            dateAdded: Date(),
-                            cornerRadius: 20,
-                            aspectRatio: 16 / 9,
-                            showBorder: false
-                        )
+            MovieCardList {
+                ForEach(previewItems) { item in
+                    MovieCardPreview(
+                        title: item.title,
+                        subtitle: "From this catalog",
+                        imageName: nil,
+                        dateAdded: Date(),
+                        cornerRadius: 20,
+                        aspectRatio: 16 / 9,
+                        showBorder: false
+                    )
+                    .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            withAnimation {
+                                previewItems.removeAll { $0.id == item.id }
+                            }
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(role: .destructive) {
+                            // method call
+                        } label: {
+                            Label("Dislike", systemImage: "hand.thumbsdown.fill")
+                        }
+                        .tint(.red)
+                        Button(role: .destructive) {
+                            // method call
+                        } label: {
+                            Label("Neutral", systemImage: "minus")
+                        }
+                        .tint(.gray)
+                        Button(role: .destructive) {
+                            // method call
+                        } label: {
+                            Label("Like", systemImage: "hand.thumbsup.fill")
+                        }
+                        .tint(.green)
+                    }
+                    .movieCardListRowStyle()
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 16)
             }
-            .scrollIndicators(.hidden)
         }
         .navigationTitle(catalog.name)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(role: .destructive) {
-                    showingDeleteConfirm = true
-                } label: {
-                    Image(systemName: "trash")
-                }
-            }
-        }
-        .confirmationDialog(
-            "Delete catalog?",
-            isPresented: $showingDeleteConfirm,
-            titleVisibility: .visible
-        ) {
-            Button("Delete", role: .destructive) {
-                Task {
-                    let deleted = await viewModel.deleteCatalog(id: catalog.id)
-                    if deleted {
-                        dismiss()
-                    }
-                }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This will remove the catalog and its movies.")
+    }
+}
+
+private struct CatalogListPreviewItem: Identifiable {
+    let id: Int
+    let title: String
+
+    static func samples(prefix: String) -> [CatalogListPreviewItem] {
+        (1...12).map {
+            CatalogListPreviewItem(id: $0, title: "\(prefix) Movie \($0)")
         }
     }
 }

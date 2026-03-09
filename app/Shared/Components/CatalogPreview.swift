@@ -1,13 +1,16 @@
 import SwiftUI
 
 struct CatalogPreview: View {
+    var cornerRadius: CGFloat = 16
+    var aspectRatio: CGFloat = 3 / 4
+
     var body: some View {
-        Rectangle()
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             .fill(Color(.secondarySystemBackground))
-            .frame(width: 150, height: 200)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .aspectRatio(aspectRatio, contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(Color.primary.opacity(0.15), lineWidth: 1)
             )
     }
