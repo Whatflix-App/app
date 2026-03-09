@@ -6,7 +6,7 @@ struct AppRouter: View {
 
     var body: some View {
         Group {
-            if !session.isAuthenticated {
+            if !session.isAuthenticated && !AppFlags.disableAuthForOfflineTesting {
                 LoginView(viewModel: environment.makeLoginViewModel(session: session))
             } else {
                 MainTabView(environment: environment, session: session)
@@ -52,10 +52,15 @@ private struct MainTabView: View {
 
             WatchlistView(
                 viewModel: watchlistViewModel,
-                searchViewModel: searchViewModel,
                 watchlistState: watchlistState
             )
                 .tabItem { Label("Watchlist", systemImage: "bookmark") }
+
+            SearchView(
+                viewModel: searchViewModel,
+                watchlistState: watchlistState
+            )
+                .tabItem { Label("Search", systemImage: "magnifyingglass") }
             
 //            CatalogsView(viewModel: catalogsViewModel)
 //                .tabItem { Label("Catalogs", systemImage: "books.vertical") }
