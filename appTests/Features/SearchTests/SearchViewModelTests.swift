@@ -106,4 +106,33 @@ struct SearchViewModelTests {
         #expect(viewModel.cachedSearches.count == 2)
         #expect(viewModel.cachedSearches.first?.movieId == "348")
     }
+
+    @Test func removeCachedSearchRemovesMovieFromHistory() async throws {
+        let cache = LocalCache()
+        let firstMovie = Movie(
+            id: UUID(),
+            title: "Alien",
+            overview: "In space, no one can hear you scream.",
+            genres: ["Sci-Fi"],
+            movieId: "348"
+        )
+        let secondMovie = Movie(
+            id: UUID(),
+            title: "Aliens",
+            overview: "Ripley returns to LV-426.",
+            genres: ["Sci-Fi"],
+            movieId: "679"
+        )
+        cache.set(try JSONEncoder().encode([firstMovie, secondMovie]), for: "search.recent.movies")
+
+        let viewModel = SearchViewModel(
+            service: SearchService(apiClient: MockAPIClient()),
+            cache: cache
+        )
+
+        viewModel.removeCachedSearch(firstMovie)
+
+        #expect(viewModel.cachedSearches.count == 1)
+        #expect(viewModel.cachedSearches.first?.movieId == "679")
+    }
 }

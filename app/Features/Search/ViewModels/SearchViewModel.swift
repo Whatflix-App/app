@@ -78,6 +78,16 @@ final class SearchViewModel: ObservableObject {
         cacheSearches([movie])
     }
 
+    func removeCachedSearch(_ movie: Movie) {
+        let movieKey = movie.movieId ?? movie.id.uuidString
+        let trimmed = cachedSearches.filter { cachedMovie in
+            let cachedKey = cachedMovie.movieId ?? cachedMovie.id.uuidString
+            return cachedKey != movieKey
+        }
+        cachedSearches = trimmed
+        persistCachedSearches(trimmed)
+    }
+
     private func loadCachedSearches() {
         guard let data = cache.data(for: CacheKeys.recentSearches),
               let decoded = try? JSONDecoder().decode([Movie].self, from: data) else {
@@ -98,8 +108,11 @@ final class SearchViewModel: ObservableObject {
         }
         let trimmed = Array(merged.prefix(historyLimit))
         cachedSearches = trimmed
+        persistCachedSearches(trimmed)
+    }
 
-        guard let data = try? JSONEncoder().encode(trimmed) else { return }
+    private func persistCachedSearches(_ movies: [Movie]) {
+        guard let data = try? JSONEncoder().encode(movies) else { return }
         cache.set(data, for: CacheKeys.recentSearches)
     }
 }

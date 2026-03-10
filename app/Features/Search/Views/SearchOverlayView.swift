@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct SearchView: View {
     @ObservedObject var viewModel: SearchViewModel
@@ -19,6 +20,7 @@ struct SearchView: View {
                         .textFieldStyle(.plain)
                         .foregroundStyle(FlicksColors.primaryText)
                         .focused($isSearchFieldFocused)
+                        .autocorrectionDisabled(true)
                         .submitLabel(.search)
                         .onSubmit {
                             Task { await viewModel.runSearch() }
@@ -41,43 +43,54 @@ struct SearchView: View {
                 .padding(.vertical, 12)
                 .glassEffect(in: RoundedRectangle(cornerRadius: 22, style: .continuous))
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
-                        if displayMovies.isEmpty {
-                            Text(viewModel.query.isEmpty ? "Type to search" : "No results")
+                List {
+                    if displayMovies.isEmpty {
+                        Text(viewModel.query.isEmpty ? "Type to search" : "No results")
+                            .font(.headline)
+                            .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, 8)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                    } else {
+                        if viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Text("Recent Searches")
                                 .font(.headline)
-                                .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundStyle(FlicksColors.primaryText.opacity(0.8))
                                 .padding(.top, 8)
-                        } else {
-                            if viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                Text("Recent Searches")
-                                    .font(.headline)
-                                    .foregroundStyle(FlicksColors.primaryText.opacity(0.8))
-                                    .padding(.top, 8)
-                            }
+                                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                        }
 
-                            ForEach(displayMovies) { movie in
-                                MovieCardMiniView(
-                                    movie: movie,
-                                    watchlistState: watchlistState,
-                                    title: movie.title,
-                                    dateWatched: nil,
-                                    overview: movie.overview,
-                                    imageName: nil,
-                                    prefix: "Matched",
-                                    onTap: {
-                                        viewModel.recordSelection(movie)
-                                    }
-                                )
-                            }
+                        ForEach(displayMovies) { movie in
+                            recentSearchRow(for: movie)
+                                .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
                         }
                     }
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .scrollIndicators(.hidden)
+                .background(Color.clear)
+                .scrollDismissesKeyboard(.interactively)
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
         }
+        .overlay(alignment: .top) {
+            SearchListTopFeather()
+                .padding(.top, 58)
+                .padding(.horizontal, 20)
+        }
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                dismissKeyboard()
+            }
+        )
         .toolbarBackground(FlicksColors.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .task {
@@ -91,6 +104,55 @@ struct SearchView: View {
     private var displayMovies: [Movie] {
         let trimmedQuery = viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmedQuery.isEmpty ? viewModel.cachedSearches : viewModel.results
+    }
+
+    private var showingRecentSearches: Bool {
+        viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func dismissKeyboard() {
+        isSearchFieldFocused = false
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    @ViewBuilder
+    private func recentSearchRow(for movie: Movie) -> some View {
+        MovieCardMiniView(
+            movie: movie,
+            watchlistState: watchlistState,
+            title: movie.title,
+            dateWatched: nil,
+            overview: movie.overview,
+            imageName: nil,
+            prefix: "Matched",
+            onTap: {
+                viewModel.recordSelection(movie)
+            }
+        )
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            if showingRecentSearches {
+                Button(role: .destructive) {
+                    viewModel.removeCachedSearch(movie)
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+        }
+    }
+}
+
+private struct SearchListTopFeather: View {
+    var body: some View {
+        LinearGradient(
+            colors: [
+                FlicksColors.background,
+                FlicksColors.background.opacity(0.0)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: 36)
+        .allowsHitTesting(false)
     }
 }
 

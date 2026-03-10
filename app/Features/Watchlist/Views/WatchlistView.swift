@@ -4,7 +4,8 @@ import Combine
 struct WatchlistView: View {
     @ObservedObject var viewModel: WatchlistViewModel
     let watchlistState: WatchlistState
-    @State private var placeholderItems: [PlaceholderItem] = PlaceholderItem.samples
+    @State private var isShowingDetail = false
+    @State private var pendingMovieIDs: Set<String>?
 
     var body: some View {
         NavigationStack {
@@ -19,58 +20,6 @@ struct WatchlistView: View {
                                 .movieCardListRowStyle()
                         }
                     } else if viewModel.items.isEmpty {
-                        ForEach(placeholderItems) { item in
-                            MovieCardPreview(
-                                title: item.title,
-                                subtitle: item.subtitle,
-                                imageName: nil,
-                                dateAdded: nil,
-                                cornerRadius: 20,
-                                aspectRatio: 16 / 9,
-                                showBorder: false
-                            )
-                            .opacity(0.72)
-                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    withAnimation {
-                                        placeholderItems.removeAll { $0.id == item.id }
-                                    }
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-
-                                }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button(role: .destructive) {
-                                    withAnimation {
-                                        placeholderItems.removeAll { $0.id == item.id }
-                                    }
-                                } label: {
-                                    Label("Dislike", systemImage: "hand.thumbsdown.fill")
-
-                                }
-                                .tint(.red)
-                                Button(role: .destructive) {
-                                    withAnimation {
-                                        placeholderItems.removeAll { $0.id == item.id }
-                                    }
-                                } label: {
-                                    Label("Neutral", systemImage: "minus")
-
-                                }
-                                .tint(.gray)
-                                Button(role: .destructive) {
-                                    withAnimation {
-                                        placeholderItems.removeAll { $0.id == item.id }
-                                    }
-                                } label: {
-                                    Label("Like", systemImage: "hand.thumbsup.fill")
-                                }
-                                .tint(.green)
-                            }
-                            .movieCardListRowStyle()
-                        }
-
                         EmptyStateView(title: "Start saving movies.")
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.top, 12)
@@ -87,16 +36,12 @@ struct WatchlistView: View {
                                 dateAdded: Date(),
                                 cornerRadius: 20,
                                 aspectRatio: 16 / 9,
-                                showBorder: false
-                            )
-                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    Task { await viewModel.delete(movie: movie) }
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
+                                showBorder: false,
+                                onDetailPresentationChanged: { isPresented in
+                                    handleDetailPresentationChange(isPresented)
                                 }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            )
+                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
                                     // method call
                                 } label: {
@@ -118,18 +63,33 @@ struct WatchlistView: View {
                                 }
                                 .tint(.green)
                             }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    Task { await viewModel.delete(movie: movie) }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                             .movieCardListRowStyle()
                         }
                     }
                 }
             }
+            .overlay(alignment: .top) {
+                WatchlistTopFeather()
+            }
             .toolbar(.hidden, for: .navigationBar)
             .toolbarBackground(FlicksColors.background, for: .tabBar)
             .toolbarBackground(.visible, for: .tabBar)
             .task { await viewModel.load() }
-            .onReceive(watchlistState.$movieIDs.dropFirst()) { _ in
+            .onReceive(watchlistState.$movieIDs.dropFirst()) { movieIDs in
+                if isShowingDetail {
+                    pendingMovieIDs = movieIDs
+                    return
+                }
+
                 Task {
-                    await viewModel.reconcile(with: watchlistState.movieIDs)
+                    await viewModel.reconcile(with: movieIDs)
                 }
             }
             .alert(
@@ -151,18 +111,33 @@ struct WatchlistView: View {
             }
         }
     }
+
+    private func handleDetailPresentationChange(_ isPresented: Bool) {
+        isShowingDetail = isPresented
+
+        guard !isPresented, let pendingMovieIDs else { return }
+        self.pendingMovieIDs = nil
+
+        Task {
+            await viewModel.reconcile(with: pendingMovieIDs)
+        }
+    }
 }
 
-private struct PlaceholderItem: Identifiable {
-    var id: String { title }
-    let title: String
-    let subtitle: String
-
-    static let samples: [PlaceholderItem] = [
-        .init(title: "Arrival", subtitle: "Linguist uncovers a deeper mystery."),
-        .init(title: "The Grand Budapest Hotel", subtitle: "A concierge's world turns chaotic."),
-        .init(title: "Blade Runner 2049", subtitle: "A new blade runner follows a hidden clue.")
-    ]
+private struct WatchlistTopFeather: View {
+    var body: some View {
+        LinearGradient(
+            colors: [
+                FlicksColors.background,
+                FlicksColors.background.opacity(0.0)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: 48)
+        .ignoresSafeArea(edges: .top)
+        .allowsHitTesting(false)
+    }
 }
 
 private struct WatchlistSkeletonCard: View {

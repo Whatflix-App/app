@@ -45,7 +45,7 @@ struct AppStyle {
     static func screenBackground(gradient: LinearGradient? = nil) -> some View {
         ZStack {
             (gradient ?? brandGradient)
-            DotGridPattern()
+            DotGridPattern(spacing: 35)
                 .opacity(backgroundDotOpacity)
         }
     }
@@ -53,8 +53,8 @@ struct AppStyle {
 
 private struct DotGridPattern: View {
     var useLightDots = false
-    private let spacing: CGFloat = 25
-    private let dotSize: CGFloat = 1.6
+    var spacing: CGFloat = 35
+    var dotSize: CGFloat = 1.6
 
     var body: some View {
         GeometryReader { proxy in

@@ -10,6 +10,7 @@ struct MovieCardPreview: View {
     let cornerRadius: CGFloat
     let aspectRatio: CGFloat
     let showBorder: Bool
+    let onDetailPresentationChanged: ((Bool) -> Void)?
 
     @State private var showsDetailSheet = false
     @State private var loadedImage: UIImage?
@@ -24,7 +25,8 @@ struct MovieCardPreview: View {
         dateAdded: Date? = Date(),
         cornerRadius: CGFloat = 20,
         aspectRatio: CGFloat = 16 / 9,
-        showBorder: Bool = true
+        showBorder: Bool = true,
+        onDetailPresentationChanged: ((Bool) -> Void)? = nil
     ) {
         self.movie = movie
         self.watchlistState = watchlistState
@@ -35,6 +37,7 @@ struct MovieCardPreview: View {
         self.cornerRadius = cornerRadius
         self.aspectRatio = aspectRatio
         self.showBorder = showBorder
+        self.onDetailPresentationChanged = onDetailPresentationChanged
     }
 
     var body: some View {
@@ -98,6 +101,9 @@ struct MovieCardPreview: View {
         .onDisappear {
             imageLoadTask?.cancel()
             imageLoadTask = nil
+        }
+        .onChange(of: showsDetailSheet) { _, isPresented in
+            onDetailPresentationChanged?(isPresented)
         }
         .sheet(isPresented: $showsDetailSheet) {
             MovieDetailView(movie: detailMovie, watchlistState: watchlistState)
