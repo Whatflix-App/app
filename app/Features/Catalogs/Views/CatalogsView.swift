@@ -2,12 +2,14 @@ import SwiftUI
 
 struct CatalogsView: View {
     @ObservedObject var viewModel: CatalogsViewModel
+    private let gridSpacing: CGFloat = 14
+    private let horizontalPadding: CGFloat = 18
+    private let bottomPadding: CGFloat = 28
+    private let previewAspectRatio: CGFloat = 3 / 4
     private let columns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
+        GridItem(.flexible(), spacing: 14),
+        GridItem(.flexible(), spacing: 14)
     ]
-    private let cardHeight: CGFloat = 320
-    private let gridSpacing: CGFloat = 16
     @State private var showingCreateSheet = false
     @State private var newCatalogName = ""
     @State private var newCatalogDescription = ""
@@ -16,16 +18,11 @@ struct CatalogsView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                Text(viewModel.title)
-                    .font(FlicksTypography.screenTitle)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .font(.footnote)
                         .foregroundStyle(.red)
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, horizontalPadding)
                 }
 
                 GeometryReader { geometry in
@@ -41,23 +38,26 @@ struct CatalogsView: View {
                                         .frame(maxWidth: .infinity)
                                         .overlay(
                                             Text(catalog.name)
-                                                .font(FlicksTypography.screenTitle)
+                                                .font(.headline.weight(.semibold))
                                                 .foregroundStyle(.primary)
                                                 .lineLimit(2)
-                                                .multilineTextAlignment(.center)
+                                                .multilineTextAlignment(.leading)
                                                 .minimumScaleFactor(0.8)
+                                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                                                 .padding(.horizontal, 14)
+                                                .padding(.vertical, 12)
                                         )
                                 }
                                 .buttonStyle(.plain)
                             }
 
-                            ForEach(0..<placeholderCount(for: geometry.size.height), id: \.self) { _ in
+                            ForEach(0..<placeholderCount(for: geometry.size), id: \.self) { _ in
                                 placeholderCard
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 24)
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.top, 4)
+                        .padding(.bottom, bottomPadding)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
@@ -114,7 +114,7 @@ struct CatalogsView: View {
                 .frame(maxWidth: .infinity)
                 .overlay(
                     Image(systemName: "plus")
-                        .font(.system(size: 42, weight: .semibold))
+                        .font(.system(size: 36, weight: .semibold))
                         .foregroundStyle(.secondary)
                 )
         }
@@ -128,10 +128,13 @@ struct CatalogsView: View {
             .opacity(0.4)
     }
 
-    private func placeholderCount(for availableHeight: CGFloat) -> Int {
+    private func placeholderCount(for size: CGSize) -> Int {
         let baseSlots = 1 + viewModel.catalogs.count
+        let availableWidth = max(0, size.width - (horizontalPadding * 2) - gridSpacing)
+        let cellWidth = availableWidth / CGFloat(columns.count)
+        let cardHeight = cellWidth / previewAspectRatio
         let rowHeight = cardHeight + gridSpacing
-        let visibleRows = max(1, Int(ceil(availableHeight / rowHeight)))
+        let visibleRows = max(1, Int(ceil(size.height / rowHeight)))
         let visibleSlots = visibleRows * columns.count
         let evenSlots = baseSlots + (baseSlots % columns.count)
         let requiredSlots = max(visibleSlots, evenSlots)

@@ -12,6 +12,9 @@ struct MovieDetailView: View {
     @State private var backgroundGradient: LinearGradient?
     @State private var loadTask: Task<Void, Never>?
     @State private var isInWatchlist = false
+    @State private var isDisliked = false
+    @State private var isLiked = false
+    @State private var isNeutral = false
     @State private var isWatchlistLoading = false
 
     private let maxContentWidth: CGFloat = 700
@@ -129,6 +132,50 @@ struct MovieDetailView: View {
                 VStack {
                     Spacer()
                     HStack {
+                        
+                        Button {
+                            Task { //rating
+                            }
+                        } label: {
+                                Image(systemName: isDisliked ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                                .font(.system(size: 22, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 56, height: 56)
+                                .background(
+                                    Circle()
+                                        .fill(.black.opacity(0.35))
+                                )
+                        }
+                        .padding(.leading, 50)
+                        .padding(.bottom, 20)
+                        Button {
+                            Task { //rating
+                            }
+                        } label: {
+                                Image(systemName: isNeutral ? "minus.circle.fill" : "minus.circle")
+                                .font(.system(size: 22, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 56, height: 56)
+                                .background(
+                                    Circle()
+                                        .fill(.black.opacity(0.35))
+                                )
+                        }
+                        .padding(.bottom, 20)
+                        Button {
+                            Task { //rating
+                            }
+                        } label: {
+                                Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                .font(.system(size: 22, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 56, height: 56)
+                                .background(
+                                    Circle()
+                                        .fill(.black.opacity(0.35))
+                                )
+                        }
+                        .padding(.bottom, 20)
                         Spacer()
                         Button {
                             Task { await toggleWatchlist() }
@@ -144,7 +191,7 @@ struct MovieDetailView: View {
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(isInWatchlist ? "Remove from watchlist" : "Add to watchlist")
-                        .padding(.trailing, 24)
+                        .padding(.trailing, 50)
                         .padding(.bottom, 20)
                     }
                 }

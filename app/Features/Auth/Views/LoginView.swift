@@ -9,25 +9,18 @@ struct LoginView: View {
             AppStyle.brandGradient
                 .ignoresSafeArea()
 
-            LinearGradient(
-                colors: [.black.opacity(0.15), .black.opacity(0.65), .black],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
-
             VStack(spacing: 20) {
                 Spacer()
 
                 VStack(spacing: 8) {
                     Text("Whatflix")
                         .font(.system(size: 48, weight: .black))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.black)
 
                     Text("find. watch. share.")
                         .font(.title3)
                         .fontWeight(.medium)
-                        .foregroundStyle(.white.opacity(0.82))
+                        .foregroundStyle(.black.opacity(0.85))
                 }
                 .padding(.bottom, 20)
 
@@ -57,23 +50,12 @@ struct LoginView: View {
                         viewModel.handleAppleAuthorizationFailure(error)
                     }
                 }
-                .signInWithAppleButtonStyle(.white)
+                .signInWithAppleButtonStyle(.black)
                 .frame(maxWidth: 280)
-                .frame(height: 50)
+                .frame(height: 54)
+                .clipShape(Capsule())
                 .padding(.horizontal, 40)
                 .disabled(viewModel.isLoading)
-
-                Button("Ping Backend") {
-                    Task { await viewModel.pingBackend() }
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.white.opacity(0.7))
-                .underline()
-                .disabled(viewModel.isLoading)
-
-                Text("Debug: \(viewModel.debugState)")
-                    .font(.footnote)
-                    .foregroundStyle(.white.opacity(0.72))
 
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)

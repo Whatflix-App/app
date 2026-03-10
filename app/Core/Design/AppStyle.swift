@@ -4,9 +4,8 @@ struct AppStyle {
     static var brandGradient: LinearGradient {
         LinearGradient(
             colors: [
-                Color(red: 0.09, green: 0.11, blue: 0.25),
-                Color(red: 0.18, green: 0.19, blue: 0.38),
-                Color(red: 0.42, green: 0.31, blue: 0.56)
+                FlicksColors.background,
+                FlicksColors.background
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing

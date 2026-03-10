@@ -4,6 +4,7 @@ import Combine
 @MainActor
 final class WatchlistState: ObservableObject {
     @Published private(set) var movieIDs: Set<String> = []
+    @Published private(set) var isRefreshing = false
 
     private let service: WatchlistService
 
@@ -12,8 +13,14 @@ final class WatchlistState: ObservableObject {
     }
 
     func refresh() async {
-        guard let movies = try? await service.fetchWatchlist() else { return }
-        sync(with: movies)
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        guard let ids = try? await service.fetchWatchlistIDs() else { return }
+        if ids != movieIDs {
+            movieIDs = ids
+        }
     }
 
     func contains(movieID: String) -> Bool {

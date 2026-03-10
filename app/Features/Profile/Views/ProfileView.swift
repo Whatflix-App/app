@@ -4,19 +4,6 @@ struct ProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
     @State private var showingLogoutConfirmation = false
 
-    private let genres: [String] = ["Adventure", "Sci-Fi", "Drama", "Thriller"]
-
-    private struct HistoryItem: Identifiable {
-        let id = UUID()
-        let title: String
-    }
-
-    private let history: [HistoryItem] = [
-        HistoryItem(title: "Iron Man"),
-        HistoryItem(title: "Interstellar"),
-        HistoryItem(title: "Everything Everywhere")
-    ]
-
     var body: some View {
         NavigationStack {
             ZStack {
@@ -26,24 +13,18 @@ struct ProfileView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         header
+                        logoutSection
                         genreSection
                         historySection
-                        logoutSection
                     }
                     .padding(20)
                 }
             }
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbar(.hidden, for: .navigationBar)
             .task {
                 await viewModel.load()
             }
-            .confirmationDialog(
-                "Log out?",
-                isPresented: $showingLogoutConfirmation,
-                titleVisibility: .visible
-            ) {
+            .alert("Log out?", isPresented: $showingLogoutConfirmation) {
                 Button("Log Out", role: .destructive) {
                     Task { await viewModel.logout() }
                 }
@@ -75,11 +56,11 @@ struct ProfileView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(viewModel.fullName.isEmpty ? viewModel.displayName : viewModel.fullName)
                     .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(FlicksColors.primaryText)
 
                 Text(viewModel.email.isEmpty ? "Movie lover" : viewModel.email)
                     .font(.system(size: 15))
-                    .foregroundStyle(.white.opacity(0.75))
+                    .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -89,22 +70,11 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Genres")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(FlicksColors.primaryText)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(genres, id: \.self) { genre in
-                        Text(genre)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .glassEffect(in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-                }
-                .padding(.horizontal, 20)
-            }
-            .padding(.horizontal, -20)
+            Text("Start watching to claim genres.")
+                .font(.system(size: 15))
+                .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
         }
     }
 
@@ -112,37 +82,30 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("History")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(FlicksColors.primaryText)
 
-            VStack(spacing: 10) {
-                ForEach(history) { movie in
-                    MovieCardMiniView(
-                        movie: nil,
-                        watchlistState: nil,
-                        title: movie.title,
-                        dateWatched: Date(),
-                        overview: nil,
-                        imageName: nil
-                    )
-                }
-            }
+            Text("Start watching to see history.")
+                .font(.system(size: 15))
+                .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
         }
     }
 
     private var logoutSection: some View {
-        Button {
-            showingLogoutConfirmation = true
-        } label: {
-            Text("Log Out")
-                .font(.system(size: 15, weight: .bold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .foregroundStyle(.white)
-                .background(Color.red.opacity(0.6))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        HStack {
+            Spacer()
+            Button {
+                showingLogoutConfirmation = true
+            } label: {
+                Text("Log Out")
+                    .font(.system(size: 15, weight: .bold))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .foregroundStyle(.white)
+                    .background(Color.red.opacity(0.75))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
-        .padding(.top, 16)
     }
 }
 

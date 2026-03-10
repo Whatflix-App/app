@@ -31,10 +31,7 @@ final class WatchlistService {
     }
 
     func fetchWatchlist() async throws -> [Movie] {
-        let data = try await apiClient.send(Endpoint.watchlist)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let decoded = try decoder.decode([WatchlistItemDTO].self, from: data)
+        let decoded = try await fetchWatchlistItems()
 
         var movies: [Movie] = []
         movies.reserveCapacity(decoded.count)
@@ -47,6 +44,11 @@ final class WatchlistService {
             }
         }
         return movies
+    }
+
+    func fetchWatchlistIDs() async throws -> Set<String> {
+        let decoded = try await fetchWatchlistItems()
+        return Set(decoded.map(\.movieId))
     }
 
     func deleteWatchlistItem(movieID: UUID) async throws {
@@ -99,4 +101,10 @@ final class WatchlistService {
         )
     }
 
+    private func fetchWatchlistItems() async throws -> [WatchlistItemDTO] {
+        let data = try await apiClient.send(Endpoint.watchlist)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode([WatchlistItemDTO].self, from: data)
+    }
 }

@@ -24,7 +24,7 @@ struct MovieCardMiniView: View {
         }
         .padding()
         .background {
-            AppStyle.brandGradient
+            Color(white: 0.2)
         }
         .overlay(
             RoundedRectangle(cornerRadius: 22, style: .continuous)

@@ -1,8 +1,8 @@
 import SwiftUI
 
 enum FlicksColors {
-    static let background = Color(.systemBackground)
-    static let primaryText = Color.primary
+    static let background = Color(red: 0.97, green: 0.96, blue: 0.94)
+    static let primaryText = Color(red: 0.11, green: 0.12, blue: 0.16)
 }
 
 #Preview {

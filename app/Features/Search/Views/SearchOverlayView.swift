@@ -1,30 +1,23 @@
 import SwiftUI
 
-struct SearchOverlayView: View {
+struct SearchView: View {
     @ObservedObject var viewModel: SearchViewModel
     @ObservedObject var watchlistState: WatchlistState
     @FocusState private var isSearchFieldFocused: Bool
 
     var body: some View {
         ZStack {
-            AppStyle.brandGradient
-                .ignoresSafeArea()
-
-            Color.black.opacity(0.45)
+            FlicksColors.background
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 18) {
-                Text(viewModel.title)
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundStyle(.white)
-
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.white.opacity(0.85))
+                        .foregroundStyle(FlicksColors.primaryText.opacity(0.7))
 
                     TextField("Search movies", text: $viewModel.query)
                         .textFieldStyle(.plain)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(FlicksColors.primaryText)
                         .focused($isSearchFieldFocused)
                         .submitLabel(.search)
                         .onSubmit {
@@ -39,7 +32,7 @@ struct SearchOverlayView: View {
                             viewModel.query = ""
                         } label: {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.white.opacity(0.8))
+                                .foregroundStyle(FlicksColors.primaryText.opacity(0.6))
                         }
                         .buttonStyle(.plain)
                     }
@@ -53,7 +46,7 @@ struct SearchOverlayView: View {
                         if viewModel.results.isEmpty {
                             Text(viewModel.query.isEmpty ? "Type to search" : "No results")
                                 .font(.headline)
-                                .foregroundStyle(.white.opacity(0.8))
+                                .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.top, 8)
                         } else {
@@ -72,9 +65,11 @@ struct SearchOverlayView: View {
                     }
                 }
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
         }
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarBackground(FlicksColors.background, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .task {
             // A delay ensures the navigation transition completes before bringing up the keyboard,
             // avoiding animation stutter.
@@ -85,7 +80,7 @@ struct SearchOverlayView: View {
 }
 
 #Preview {
-    SearchOverlayView(
+    SearchView(
         viewModel: PreviewSupport.searchViewModel,
         watchlistState: PreviewSupport.watchlistState
     )
