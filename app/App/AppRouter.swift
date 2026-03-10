@@ -2,15 +2,63 @@ import SwiftUI
 
 struct AppRouter: View {
     let environment: AppEnvironment
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var session = SessionStore()
+    @State private var isRestoringSession = false
 
     var body: some View {
         Group {
-            if !session.isAuthenticated && !AppFlags.disableAuthForOfflineTesting {
+            if isRestoringSession {
+                LoadingView()
+            } else if !session.isAuthenticated && !AppFlags.disableAuthForOfflineTesting {
                 LoginView(viewModel: environment.makeLoginViewModel(session: session))
             } else {
                 MainTabView(environment: environment, session: session)
             }
+        }
+        .task {
+            await restoreSessionIfNeeded()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            Task {
+                await refreshSessionOnForeground()
+            }
+        }
+    }
+
+    @MainActor
+    private func restoreSessionIfNeeded() async {
+        guard !AppFlags.disableAuthForOfflineTesting else { return }
+        guard environment.authTokenStore.hasStoredSession else {
+            session.markLoggedOut()
+            return
+        }
+
+        isRestoringSession = true
+        defer { isRestoringSession = false }
+
+        do {
+            _ = try await environment.makeAuthService().refreshIfPossible()
+            session.markAuthenticated()
+        } catch {
+            environment.authTokenStore.clear()
+            session.markLoggedOut()
+        }
+    }
+
+    @MainActor
+    private func refreshSessionOnForeground() async {
+        guard !AppFlags.disableAuthForOfflineTesting else { return }
+        guard !isRestoringSession else { return }
+        guard environment.authTokenStore.hasStoredSession else { return }
+
+        do {
+            _ = try await environment.makeAuthService().refreshIfPossible()
+            session.markAuthenticated()
+        } catch {
+            environment.authTokenStore.clear()
+            session.markLoggedOut()
         }
     }
 }

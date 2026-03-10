@@ -20,11 +20,47 @@ final class APIClient: APIClienting {
     }
 
     func send(_ request: APIRequest) async throws -> Data {
+        do {
+            return try await perform(request)
+        } catch NetworkError.unauthorized where request.requiresAuth && request.path != "auth/refresh" {
+            try await refreshSession()
+            return try await perform(request)
+        }
+    }
+
+    private func perform(_ request: APIRequest) async throws -> Data {
+        let urlRequest = try buildURLRequest(for: request)
+        print("APIClient -> \(request.method) \(urlRequest.url?.absoluteString ?? request.path)")
+
+        let (data, response) = try await session.data(for: urlRequest)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkError.requestFailed
+        }
+
+        print("APIClient <- status \(httpResponse.statusCode) for \(urlRequest.url?.absoluteString ?? request.path)")
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if httpResponse.statusCode == 401 {
+                throw NetworkError.unauthorized
+            }
+
+            if let serverError = try? JSONDecoder().decode(APIErrorEnvelope.self, from: data) {
+                throw NetworkError.serverError(
+                    code: serverError.error.code,
+                    message: serverError.error.message
+                )
+            }
+
+            throw NetworkError.requestFailed
+        }
+
+        return data
+    }
+
+    private func buildURLRequest(for request: APIRequest) throws -> URLRequest {
         guard let url = URL(string: request.path, relativeTo: baseURL) else {
             throw NetworkError.invalidURL
         }
-
-        print("APIClient -> \(request.method) \(url.absoluteString)")
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = request.method
@@ -43,28 +79,31 @@ final class APIClient: APIClienting {
             urlRequest.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
 
-        let (data, response) = try await session.data(for: urlRequest)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw NetworkError.requestFailed
+        return urlRequest
+    }
+
+    private func refreshSession() async throws {
+        guard tokenStore.hasStoredSession,
+              let refreshToken = tokenStore.refreshToken(),
+              let sessionID = tokenStore.sessionID() else {
+            throw NetworkError.unauthorized
         }
 
-        print("APIClient <- status \(httpResponse.statusCode) for \(url.absoluteString)")
+        let payload = RefreshRequestPayload(refreshToken: refreshToken, sessionId: sessionID)
+        let refreshRequest = try Endpoint.refresh(payload)
+        let data = try await perform(refreshRequest)
 
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if httpResponse.statusCode == 401 {
-                throw NetworkError.unauthorized
-            }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
 
-            if let serverError = try? JSONDecoder().decode(APIErrorEnvelope.self, from: data) {
-                throw NetworkError.serverError(
-                    code: serverError.error.code,
-                    message: serverError.error.message
-                )
-            }
-
-            throw NetworkError.requestFailed
+        let response: RefreshResponsePayload
+        do {
+            response = try decoder.decode(RefreshResponsePayload.self, from: data)
+        } catch {
+            throw NetworkError.decodingFailed
         }
 
-        return data
+        tokenStore.updateAccessToken(response.tokens.accessToken)
+        tokenStore.updateRefreshToken(response.tokens.refreshToken)
     }
 }

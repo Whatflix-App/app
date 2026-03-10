@@ -13,6 +13,10 @@ final class AuthTokenStore {
         self.keychain = keychain
     }
 
+    var hasStoredSession: Bool {
+        refreshToken() != nil && sessionID() != nil
+    }
+
     func save(accessToken: String, refreshToken: String, sessionID: String) {
         self.accessToken = accessToken
         keychain.save(refreshToken, for: Keys.refreshToken)
