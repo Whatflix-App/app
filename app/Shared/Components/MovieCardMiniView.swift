@@ -8,6 +8,7 @@ struct MovieCardMiniView: View {
     let overview: String?
     let imageName: String?
     var prefix: String = "Watched on"
+    var onTap: (() -> Void)? = nil
     @State private var showsDetailSheet = false
 
     var body: some View {
@@ -33,6 +34,7 @@ struct MovieCardMiniView: View {
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .onTapGesture {
+            onTap?()
             showsDetailSheet = true
         }
         .sheet(isPresented: $showsDetailSheet) {

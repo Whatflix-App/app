@@ -36,7 +36,7 @@ struct MovieDetailView: View {
             let heroWidth = max(contentWidth - 32, 1)
 
             ZStack {
-                (backgroundGradient ?? AppStyle.brandGradient)
+                AppStyle.screenBackground(gradient: backgroundGradient)
                     .ignoresSafeArea()
 
                 ScrollView {

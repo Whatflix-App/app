@@ -7,7 +7,7 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppStyle.brandGradient
+                AppStyle.screenBackground()
                     .ignoresSafeArea()
 
                 ScrollView {

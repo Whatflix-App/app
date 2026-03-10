@@ -15,7 +15,7 @@ struct CatalogListView: View {
 
     var body: some View {
         ZStack {
-            AppStyle.brandGradient
+            AppStyle.screenBackground()
                 .ignoresSafeArea()
 
             MovieCardList {

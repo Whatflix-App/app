@@ -9,7 +9,7 @@ struct WatchlistView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppStyle.brandGradient
+                AppStyle.screenBackground()
                     .ignoresSafeArea()
 
                 MovieCardList {

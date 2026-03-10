@@ -13,10 +13,12 @@ enum PreviewSupport {
 
     static let apiClient: any APIClienting = PreviewAPIClient()
     static let authTokenStore = AuthTokenStore()
+    static let localCache = LocalCache()
 
     static let environment = AppEnvironment(
         apiClient: apiClient,
-        authTokenStore: authTokenStore
+        authTokenStore: authTokenStore,
+        localCache: localCache
     )
 
     static let loginViewModel = LoginViewModel(
@@ -32,7 +34,8 @@ enum PreviewSupport {
     static let forYouViewModel = ForYouViewModel()
 
     static let searchViewModel = SearchViewModel(
-        service: SearchService(apiClient: apiClient)
+        service: SearchService(apiClient: apiClient),
+        cache: localCache
     )
 
     static let catalogState = CatalogState()

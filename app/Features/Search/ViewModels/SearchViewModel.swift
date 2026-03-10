@@ -3,16 +3,30 @@ import Combine
 
 @MainActor
 final class SearchViewModel: ObservableObject {
+    private enum CacheKeys {
+        static let recentSearches = "search.recent.movies"
+    }
+
     @Published var title = "Movie Search"
     @Published var query = ""
     @Published private(set) var results: [Movie] = []
+    @Published private(set) var cachedSearches: [Movie] = []
     @Published private(set) var isSearching = false
 
     private let service: any SearchServicing
+    private let cache: LocalCache
+    private let historyLimit: Int
     private var cancellables = Set<AnyCancellable>()
 
-    init(service: any SearchServicing) {
+    init(
+        service: any SearchServicing,
+        cache: LocalCache = LocalCache(),
+        historyLimit: Int = 12
+    ) {
         self.service = service
+        self.cache = cache
+        self.historyLimit = historyLimit
+        loadCachedSearches()
         setupSearch()
     }
 
@@ -58,5 +72,34 @@ final class SearchViewModel: ObservableObject {
             results = []
         }
         isSearching = false
+    }
+
+    func recordSelection(_ movie: Movie) {
+        cacheSearches([movie])
+    }
+
+    private func loadCachedSearches() {
+        guard let data = cache.data(for: CacheKeys.recentSearches),
+              let decoded = try? JSONDecoder().decode([Movie].self, from: data) else {
+            cachedSearches = []
+            return
+        }
+        cachedSearches = Array(decoded.prefix(historyLimit))
+    }
+
+    private func cacheSearches(_ movies: [Movie]) {
+        guard !movies.isEmpty else { return }
+
+        var merged = movies + cachedSearches
+        var seen = Set<String>()
+        merged.removeAll { movie in
+            let key = movie.movieId ?? movie.id.uuidString
+            return !seen.insert(key).inserted
+        }
+        let trimmed = Array(merged.prefix(historyLimit))
+        cachedSearches = trimmed
+
+        guard let data = try? JSONEncoder().encode(trimmed) else { return }
+        cache.set(data, for: CacheKeys.recentSearches)
     }
 }

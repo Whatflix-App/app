@@ -7,7 +7,7 @@ struct SearchView: View {
 
     var body: some View {
         ZStack {
-            FlicksColors.background
+            AppStyle.screenBackground()
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 18) {
@@ -43,14 +43,21 @@ struct SearchView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
-                        if viewModel.results.isEmpty {
+                        if displayMovies.isEmpty {
                             Text(viewModel.query.isEmpty ? "Type to search" : "No results")
                                 .font(.headline)
                                 .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.top, 8)
                         } else {
-                            ForEach(viewModel.results) { movie in
+                            if viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                Text("Recent Searches")
+                                    .font(.headline)
+                                    .foregroundStyle(FlicksColors.primaryText.opacity(0.8))
+                                    .padding(.top, 8)
+                            }
+
+                            ForEach(displayMovies) { movie in
                                 MovieCardMiniView(
                                     movie: movie,
                                     watchlistState: watchlistState,
@@ -58,7 +65,10 @@ struct SearchView: View {
                                     dateWatched: nil,
                                     overview: movie.overview,
                                     imageName: nil,
-                                    prefix: "Matched"
+                                    prefix: "Matched",
+                                    onTap: {
+                                        viewModel.recordSelection(movie)
+                                    }
                                 )
                             }
                         }
@@ -76,6 +86,11 @@ struct SearchView: View {
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
             isSearchFieldFocused = true
         }
+    }
+
+    private var displayMovies: [Movie] {
+        let trimmedQuery = viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedQuery.isEmpty ? viewModel.cachedSearches : viewModel.results
     }
 }
 

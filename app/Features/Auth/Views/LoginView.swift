@@ -6,7 +6,7 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            AppStyle.brandGradient
+            AppStyle.screenBackground()
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {

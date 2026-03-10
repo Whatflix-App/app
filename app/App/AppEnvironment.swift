@@ -3,19 +3,22 @@ import Foundation
 struct AppEnvironment {
     let apiClient: any APIClienting
     let authTokenStore: AuthTokenStore
+    let localCache: LocalCache
 
     static let live = AppEnvironment.wiredLive
 
-    init(apiClient: any APIClienting, authTokenStore: AuthTokenStore) {
+    init(apiClient: any APIClienting, authTokenStore: AuthTokenStore, localCache: LocalCache = LocalCache()) {
         self.apiClient = apiClient
         self.authTokenStore = authTokenStore
+        self.localCache = localCache
     }
 
     static var wiredLive: AppEnvironment {
         let tokenStore = AuthTokenStore()
         return AppEnvironment(
             apiClient: APIClient(tokenStore: tokenStore),
-            authTokenStore: tokenStore
+            authTokenStore: tokenStore,
+            localCache: LocalCache()
         )
     }
 
@@ -42,7 +45,10 @@ struct AppEnvironment {
     }
 
     func makeSearchViewModel() -> SearchViewModel {
-        SearchViewModel(service: SearchService(apiClient: apiClient))
+        SearchViewModel(
+            service: SearchService(apiClient: apiClient),
+            cache: localCache
+        )
     }
 
     func makeCatalogsViewModel() -> CatalogsViewModel {

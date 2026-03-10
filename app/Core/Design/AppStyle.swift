@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AppStyle {
+    static let backgroundDotOpacity: CGFloat = 0.15
+
     static var brandGradient: LinearGradient {
         LinearGradient(
             colors: [
@@ -37,5 +39,43 @@ struct AppStyle {
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
+    }
+
+    @ViewBuilder
+    static func screenBackground(gradient: LinearGradient? = nil) -> some View {
+        ZStack {
+            (gradient ?? brandGradient)
+            DotGridPattern()
+                .opacity(backgroundDotOpacity)
+        }
+    }
+}
+
+private struct DotGridPattern: View {
+    var useLightDots = false
+    private let spacing: CGFloat = 25
+    private let dotSize: CGFloat = 1.6
+
+    var body: some View {
+        GeometryReader { proxy in
+            let columns = Int(ceil(proxy.size.width / spacing)) + 1
+            let rows = Int(ceil(proxy.size.height / spacing)) + 1
+            let dotColor: Color = useLightDots ? .white : .black
+
+            Canvas { context, _ in
+                for row in 0..<rows {
+                    for column in 0..<columns {
+                        let x = CGFloat(column) * spacing
+                        let y = CGFloat(row) * spacing
+                        let rect = CGRect(x: x, y: y, width: dotSize, height: dotSize)
+                        context.fill(
+                            Path(ellipseIn: rect),
+                            with: .color(dotColor)
+                        )
+                    }
+                }
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
