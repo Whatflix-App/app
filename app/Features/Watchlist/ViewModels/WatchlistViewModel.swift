@@ -10,19 +10,23 @@ final class WatchlistViewModel: ObservableObject {
 
     private let service: WatchlistService
     private let watchlistState: WatchlistState?
+    private var hasLoadedOnce = false
 
     init(service: WatchlistService, watchlistState: WatchlistState? = nil) {
         self.service = service
         self.watchlistState = watchlistState
     }
 
-    func load() async {
+    func load(force: Bool = false) async {
         guard !isLoading else { return }
+        if hasLoadedOnce && !force { return }
+
         isLoading = true
         defer { isLoading = false }
 
         let loaded = (try? await service.fetchWatchlist()) ?? []
         items = loaded
+        hasLoadedOnce = true
         watchlistState?.sync(with: loaded)
     }
 
@@ -46,5 +50,16 @@ final class WatchlistViewModel: ObservableObject {
             guard let movieID = movie.movieId else { return false }
             return !movieIDs.contains(movieID)
         }
+    }
+
+    func reconcile(with movieIDs: Set<String>) async {
+        let loadedIDs = Set(items.compactMap(\.movieId))
+        let addedIDs = movieIDs.subtracting(loadedIDs)
+        if !addedIDs.isEmpty {
+            await load(force: true)
+            return
+        }
+
+        pruneItems(keeping: movieIDs)
     }
 }
