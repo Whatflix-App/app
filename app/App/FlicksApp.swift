@@ -8,14 +8,22 @@ struct FlicksApp: App {
     init() {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(red: 0.97, green: 0.96, blue: 0.94, alpha: 1.0)
+        appearance.backgroundColor = SystemTheme.navigationBarColor
         appearance.shadowColor = .clear
-        appearance.titleTextAttributes = [.foregroundColor: UIColor.black]
-        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.black]
+        appearance.titleTextAttributes = [.foregroundColor: SystemTheme.navigationTextColor]
+        appearance.largeTitleTextAttributes = [.foregroundColor: SystemTheme.navigationTextColor]
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
-        UINavigationBar.appearance().tintColor = .black
+        UINavigationBar.appearance().tintColor = SystemTheme.navigationTextColor
+
+        let tabAppearance = UITabBarAppearance()
+        tabAppearance.configureWithOpaqueBackground()
+        tabAppearance.backgroundColor = SystemTheme.navigationBarColor
+        tabAppearance.shadowColor = .clear
+        UITabBar.appearance().standardAppearance = tabAppearance
+        UITabBar.appearance().scrollEdgeAppearance = tabAppearance
+        UITabBar.appearance().tintColor = SystemTheme.navigationTextColor
     }
 
     var body: some Scene {

@@ -7,7 +7,7 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppStyle.screenBackground()
+                SystemScreenBackground()
                     .ignoresSafeArea()
 
                 ScrollView {
@@ -56,11 +56,11 @@ struct ProfileView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(viewModel.fullName.isEmpty ? viewModel.displayName : viewModel.fullName)
                     .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(FlicksColors.primaryText)
+                    .foregroundStyle(SystemTheme.primaryText)
 
                 Text(viewModel.email.isEmpty ? "Movie lover" : viewModel.email)
                     .font(.system(size: 15))
-                    .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
+                    .foregroundStyle(SystemTheme.secondaryText)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -70,11 +70,11 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Genres")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(FlicksColors.primaryText)
+                .foregroundStyle(SystemTheme.primaryText)
 
             Text("Start watching to claim genres.")
                 .font(.system(size: 15))
-                .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
+                .foregroundStyle(SystemTheme.secondaryText)
         }
     }
 
@@ -82,11 +82,11 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("History")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(FlicksColors.primaryText)
+                .foregroundStyle(SystemTheme.primaryText)
 
             Text("Start watching to see history.")
                 .font(.system(size: 15))
-                .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
+                .foregroundStyle(SystemTheme.secondaryText)
         }
     }
 

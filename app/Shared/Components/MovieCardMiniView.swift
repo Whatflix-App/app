@@ -16,7 +16,7 @@ struct MovieCardMiniView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(SystemTheme.primaryText)
                     .lineLimit(1)
 
                 subtitleView
@@ -25,11 +25,11 @@ struct MovieCardMiniView: View {
         }
         .padding()
         .background {
-            Color(white: 0.2)
+            SystemTheme.surface
         }
         .overlay(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(.white.opacity(0.15), lineWidth: 0.8)
+                .stroke(SystemTheme.border, lineWidth: 0.8)
         )
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -50,21 +50,21 @@ struct MovieCardMiniView: View {
             if prefix == "Watched on" && dateWatched.watchLabel == "Today" {
                 Text("Watched Today")
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(SystemTheme.secondaryText)
             } else {
                 Text("\(prefix) \(dateWatched.watchLabel)")
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(SystemTheme.secondaryText)
             }
         } else if !genreText.isEmpty {
             Text(genreText)
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(SystemTheme.secondaryText)
                 .lineLimit(2)
         } else {
             Text("No genres available")
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.65))
+                .foregroundStyle(SystemTheme.secondaryText.opacity(0.8))
         }
     }
 

@@ -17,53 +17,57 @@ struct CatalogsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .padding(.horizontal, horizontalPadding)
-                }
+            ZStack {
+                SystemScreenBackground()
+                    .ignoresSafeArea()
 
-                GeometryReader { geometry in
-                    ScrollView(.vertical, showsIndicators: true) {
-                        LazyVGrid(columns: columns, spacing: gridSpacing) {
-                            createCatalogCard
-
-                            ForEach(viewModel.catalogs) { catalog in
-                                NavigationLink {
-                                    CatalogListView(catalog: catalog, viewModel: viewModel)
-                                } label: {
-                                    CatalogPreview()
-                                        .frame(maxWidth: .infinity)
-                                        .overlay(
-                                            Text(catalog.name)
-                                                .font(.headline.weight(.semibold))
-                                                .foregroundStyle(.primary)
-                                                .lineLimit(2)
-                                                .multilineTextAlignment(.leading)
-                                                .minimumScaleFactor(0.8)
-                                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                                                .padding(.horizontal, 14)
-                                                .padding(.vertical, 12)
-                                        )
-                                }
-                                .buttonStyle(.plain)
-                            }
-
-                            ForEach(0..<placeholderCount(for: geometry.size), id: \.self) { _ in
-                                placeholderCard
-                            }
-                        }
-                        .padding(.horizontal, horizontalPadding)
-                        .padding(.top, 4)
-                        .padding(.bottom, bottomPadding)
+                VStack(alignment: .leading, spacing: 16) {
+                    if let errorMessage = viewModel.errorMessage {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .padding(.horizontal, horizontalPadding)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                    GeometryReader { geometry in
+                        ScrollView(.vertical, showsIndicators: true) {
+                            LazyVGrid(columns: columns, spacing: gridSpacing) {
+                                createCatalogCard
+
+                                ForEach(viewModel.catalogs) { catalog in
+                                    NavigationLink {
+                                        CatalogListView(catalog: catalog, viewModel: viewModel)
+                                    } label: {
+                                        CatalogPreview()
+                                            .frame(maxWidth: .infinity)
+                                            .overlay(
+                                                Text(catalog.name)
+                                                    .font(.headline.weight(.semibold))
+                                                    .foregroundStyle(SystemTheme.primaryText)
+                                                    .lineLimit(2)
+                                                    .multilineTextAlignment(.leading)
+                                                    .minimumScaleFactor(0.8)
+                                                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                                                    .padding(.horizontal, 14)
+                                                    .padding(.vertical, 12)
+                                            )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+
+                                ForEach(0..<placeholderCount(for: geometry.size), id: \.self) { _ in
+                                    placeholderCard
+                                }
+                            }
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.top, 4)
+                            .padding(.bottom, bottomPadding)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(Color(.systemBackground))
             .sheet(isPresented: $showingCreateSheet) {
                 NavigationStack {
                     Form {

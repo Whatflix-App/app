@@ -8,17 +8,17 @@ struct SearchView: View {
 
     var body: some View {
         ZStack {
-            AppStyle.screenBackground()
+            SystemScreenBackground()
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 18) {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
-                        .foregroundStyle(FlicksColors.primaryText.opacity(0.7))
+                        .foregroundStyle(SystemTheme.secondaryText)
 
                     TextField("Search movies", text: $viewModel.query)
                         .textFieldStyle(.plain)
-                        .foregroundStyle(FlicksColors.primaryText)
+                        .foregroundStyle(SystemTheme.primaryText)
                         .focused($isSearchFieldFocused)
                         .autocorrectionDisabled(true)
                         .submitLabel(.search)
@@ -34,7 +34,7 @@ struct SearchView: View {
                             viewModel.query = ""
                         } label: {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(FlicksColors.primaryText.opacity(0.6))
+                                .foregroundStyle(SystemTheme.secondaryText)
                         }
                         .buttonStyle(.plain)
                     }
@@ -47,7 +47,7 @@ struct SearchView: View {
                     if displayMovies.isEmpty {
                         Text(viewModel.query.isEmpty ? "Type to search" : "No results")
                             .font(.headline)
-                            .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
+                            .foregroundStyle(SystemTheme.secondaryText)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.top, 8)
                             .listRowBackground(Color.clear)
@@ -56,7 +56,7 @@ struct SearchView: View {
                         if viewModel.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             Text("Recent Searches")
                                 .font(.headline)
-                                .foregroundStyle(FlicksColors.primaryText.opacity(0.8))
+                                .foregroundStyle(SystemTheme.secondaryText)
                                 .padding(.top, 8)
                                 .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
                                 .listRowBackground(Color.clear)
@@ -91,7 +91,7 @@ struct SearchView: View {
                 dismissKeyboard()
             }
         )
-        .toolbarBackground(FlicksColors.background, for: .navigationBar)
+        .toolbarBackground(SystemTheme.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .task {
             // A delay ensures the navigation transition completes before bringing up the keyboard,
@@ -145,8 +145,8 @@ private struct SearchListTopFeather: View {
     var body: some View {
         LinearGradient(
             colors: [
-                FlicksColors.background,
-                FlicksColors.background.opacity(0.0)
+                SystemTheme.background,
+                SystemTheme.background.opacity(0.0)
             ],
             startPoint: .top,
             endPoint: .bottom

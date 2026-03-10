@@ -15,7 +15,7 @@ struct CatalogListView: View {
 
     var body: some View {
         ZStack {
-            AppStyle.screenBackground()
+            SystemScreenBackground()
                 .ignoresSafeArea()
 
             MovieCardList {

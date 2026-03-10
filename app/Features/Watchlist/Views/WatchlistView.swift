@@ -10,7 +10,7 @@ struct WatchlistView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppStyle.screenBackground()
+                SystemScreenBackground()
                     .ignoresSafeArea()
 
                 MovieCardList {
@@ -23,7 +23,7 @@ struct WatchlistView: View {
                         EmptyStateView(title: "Start saving movies.")
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.top, 12)
-                            .foregroundStyle(FlicksColors.primaryText.opacity(0.75))
+                            .foregroundStyle(SystemTheme.secondaryText)
                             .movieCardListRowStyle()
                     } else {
                         ForEach(viewModel.items) { movie in
@@ -79,7 +79,7 @@ struct WatchlistView: View {
                 WatchlistTopFeather()
             }
             .toolbar(.hidden, for: .navigationBar)
-            .toolbarBackground(FlicksColors.background, for: .tabBar)
+            .toolbarBackground(SystemTheme.background, for: .tabBar)
             .toolbarBackground(.visible, for: .tabBar)
             .task { await viewModel.load() }
             .onReceive(watchlistState.$movieIDs.dropFirst()) { movieIDs in
@@ -128,8 +128,8 @@ private struct WatchlistTopFeather: View {
     var body: some View {
         LinearGradient(
             colors: [
-                FlicksColors.background,
-                FlicksColors.background.opacity(0.0)
+                SystemTheme.background,
+                SystemTheme.background.opacity(0.0)
             ],
             startPoint: .top,
             endPoint: .bottom

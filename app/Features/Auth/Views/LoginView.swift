@@ -6,7 +6,7 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            AppStyle.screenBackground()
+            SystemScreenBackground()
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {
@@ -15,12 +15,12 @@ struct LoginView: View {
                 VStack(spacing: 8) {
                     Text("Whatflix")
                         .font(.system(size: 48, weight: .black))
-                        .foregroundStyle(.black)
+                        .foregroundStyle(SystemTheme.primaryText)
 
                     Text("find. watch. share.")
                         .font(.title3)
                         .fontWeight(.medium)
-                        .foregroundStyle(.black.opacity(0.85))
+                        .foregroundStyle(SystemTheme.secondaryText)
                 }
                 .padding(.bottom, 20)
 
