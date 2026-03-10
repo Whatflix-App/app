@@ -128,7 +128,9 @@ struct WatchlistView: View {
             .toolbarBackground(.visible, for: .tabBar)
             .task { await viewModel.load() }
             .onReceive(watchlistState.$movieIDs.dropFirst()) { _ in
-                viewModel.pruneItems(keeping: watchlistState.movieIDs)
+                Task {
+                    await viewModel.reconcile(with: watchlistState.movieIDs)
+                }
             }
             .alert(
                 "Couldn't remove movie",
