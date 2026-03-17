@@ -15,6 +15,7 @@ enum Endpoint {
 
     static let health = APIRequest(path: "health", method: "GET")
     static let profile = APIRequest(path: "profile", method: "GET", requiresAuth: true)
+    static let watchHistory = APIRequest(path: "history/watch", method: "GET", requiresAuth: true)
     static let catalogs = APIRequest(path: "catalogs", method: "GET", requiresAuth: true)
     static let watchlist = APIRequest(path: "watchlist", method: "GET", requiresAuth: true)
 
@@ -88,6 +89,32 @@ enum Endpoint {
             path: "profile",
             method: "PATCH",
             body: try JSONEncoder().encode(Payload(displayName: displayName)),
+            requiresAuth: true
+        )
+    }
+
+    static func movieUserState(movieID: String) -> APIRequest {
+        APIRequest(path: "movies/\(movieID)/user-state", method: "GET", requiresAuth: true)
+    }
+
+    static func putMovieRating(movieID: String, rating: Int, source: String = "manual") throws -> APIRequest {
+        struct Payload: Codable {
+            let rating: Int
+            let source: String
+        }
+
+        return APIRequest(
+            path: "movies/\(movieID)/rating",
+            method: "PUT",
+            body: try JSONEncoder().encode(Payload(rating: rating, source: source)),
+            requiresAuth: true
+        )
+    }
+
+    static func deleteMovieRating(movieID: String) -> APIRequest {
+        APIRequest(
+            path: "movies/\(movieID)/rating",
+            method: "DELETE",
             requiresAuth: true
         )
     }

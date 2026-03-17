@@ -34,8 +34,11 @@ final class WatchlistViewModel: ObservableObject {
         errorMessage = nil
         do {
             if let movieID = movie.movieId {
-                try await service.deleteWatchlistItem(movieID: movieID)
-                watchlistState?.markRemoved(movieID: movieID)
+                if let watchlistState {
+                    try await watchlistState.remove(movieID: movieID)
+                } else {
+                    try await service.deleteWatchlistItem(movieID: movieID)
+                }
             } else {
                 try await service.deleteWatchlistItem(movieID: movie.id)
             }

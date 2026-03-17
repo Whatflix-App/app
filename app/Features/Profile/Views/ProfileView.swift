@@ -1,8 +1,13 @@
 import SwiftUI
+import Combine
 
 struct ProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
+    @ObservedObject var historyState: HistoryState
     @State private var showingLogoutConfirmation = false
+    @State private var isShowingDetail = false
+    @State private var visibleHistoryItems: [WatchHistoryEntry] = []
+    @State private var pendingHistoryItems: [WatchHistoryEntry]?
 
     var body: some View {
         NavigationStack {
@@ -14,7 +19,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         header
                         logoutSection
-                        genreSection
+//                        genreSection
                         historySection
                     }
                     .padding(20)
@@ -22,7 +27,16 @@ struct ProfileView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .task {
+                visibleHistoryItems = historyState.items
                 await viewModel.load()
+            }
+            .onReceive(historyState.$items.dropFirst()) { items in
+                if isShowingDetail {
+                    pendingHistoryItems = items
+                    return
+                }
+
+                visibleHistoryItems = items
             }
             .alert("Log out?", isPresented: $showingLogoutConfirmation) {
                 Button("Log Out", role: .destructive) {
@@ -84,10 +98,36 @@ struct ProfileView: View {
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(SystemTheme.primaryText)
 
-            Text("Start watching to see history.")
-                .font(.system(size: 15))
-                .foregroundStyle(SystemTheme.secondaryText)
+            if visibleHistoryItems.isEmpty {
+                Text("Start watching to see history.")
+                    .font(.system(size: 15))
+                    .foregroundStyle(SystemTheme.secondaryText)
+            } else {
+                ForEach(visibleHistoryItems.prefix(8)) { item in
+                    MovieCardMiniView(
+                        movie: item.movie,
+                        watchlistState: nil,
+                        historyState: historyState,
+                        title: item.movie?.title ?? item.movieId,
+                        dateWatched: item.watchedAt,
+                        overview: item.movie?.overview,
+                        imageName: item.movie?.backdropPath,
+                        prefix: item.completed ? "Watched" : "\(item.progressPct)% on",
+                        onDetailPresentationChanged: { isPresented in
+                            handleDetailPresentationChange(isPresented)
+                        }
+                    )
+                }
+            }
         }
+    }
+
+    private func handleDetailPresentationChange(_ isPresented: Bool) {
+        isShowingDetail = isPresented
+
+        guard !isPresented, let pendingHistoryItems else { return }
+        self.pendingHistoryItems = nil
+        visibleHistoryItems = pendingHistoryItems
     }
 
     private var logoutSection: some View {
@@ -110,5 +150,8 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView(viewModel: PreviewSupport.profileViewModel)
+    ProfileView(
+        viewModel: PreviewSupport.profileViewModel,
+        historyState: PreviewSupport.historyState
+    )
 }

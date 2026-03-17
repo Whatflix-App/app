@@ -4,6 +4,7 @@ import Combine
 struct WatchlistView: View {
     @ObservedObject var viewModel: WatchlistViewModel
     let watchlistState: WatchlistState
+    let historyState: HistoryState
     @State private var isShowingDetail = false
     @State private var pendingMovieIDs: Set<String>?
 
@@ -30,6 +31,7 @@ struct WatchlistView: View {
                             MovieCardPreview(
                                 movie: movie,
                                 watchlistState: watchlistState,
+                                historyState: historyState,
                                 title: movie.title,
                                 subtitle: movie.overview,
                                 imageName: movie.backdropPath,
@@ -41,28 +43,6 @@ struct WatchlistView: View {
                                     handleDetailPresentationChange(isPresented)
                                 }
                             )
-                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                Button(role: .destructive) {
-                                    // method call
-                                } label: {
-                                    Label("Dislike", systemImage: "hand.thumbsdown.fill")
-
-                                }
-                                .tint(.red)
-                                Button(role: .destructive) {
-                                    // method call
-                                } label: {
-                                    Label("Neutral", systemImage: "minus")
-
-                                }
-                                .tint(.gray)
-                                Button(role: .destructive) {
-                                    // method call
-                                } label: {
-                                    Label("Like", systemImage: "hand.thumbsup.fill")
-                                }
-                                .tint(.green)
-                            }
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     Task { await viewModel.delete(movie: movie) }
@@ -185,6 +165,7 @@ private struct WatchlistSkeletonCard: View {
 #Preview {
     WatchlistView(
         viewModel: PreviewSupport.watchlistViewModel,
-        watchlistState: PreviewSupport.watchlistState
+        watchlistState: PreviewSupport.watchlistState,
+        historyState: PreviewSupport.historyState
     )
 }

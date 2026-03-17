@@ -4,6 +4,7 @@ import UIKit
 struct SearchView: View {
     @ObservedObject var viewModel: SearchViewModel
     @ObservedObject var watchlistState: WatchlistState
+    @ObservedObject var historyState: HistoryState
     @FocusState private var isSearchFieldFocused: Bool
 
     var body: some View {
@@ -120,6 +121,7 @@ struct SearchView: View {
         MovieCardMiniView(
             movie: movie,
             watchlistState: watchlistState,
+            historyState: historyState,
             title: movie.title,
             dateWatched: nil,
             overview: movie.overview,
@@ -159,6 +161,7 @@ private struct SearchListTopFeather: View {
 #Preview {
     SearchView(
         viewModel: PreviewSupport.searchViewModel,
-        watchlistState: PreviewSupport.watchlistState
+        watchlistState: PreviewSupport.watchlistState,
+        historyState: PreviewSupport.historyState
     )
 }

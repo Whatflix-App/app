@@ -73,6 +73,7 @@ private struct MainTabView: View {
     @StateObject private var catalogsViewModel: CatalogsViewModel
     @StateObject private var watchlistState: WatchlistState
     @StateObject private var watchlistViewModel: WatchlistViewModel
+    @StateObject private var historyState: HistoryState
     @StateObject private var profileViewModel: ProfileViewModel
 
     init(environment: AppEnvironment, session: SessionStore) {
@@ -80,6 +81,7 @@ private struct MainTabView: View {
         self.session = session
         let sharedCatalogState = environment.makeCatalogState()
         let sharedWatchlistState = environment.makeWatchlistState()
+        let sharedHistoryState = environment.makeHistoryState()
         _forYouViewModel = StateObject(wrappedValue: environment.makeForYouViewModel())
         _searchViewModel = State(wrappedValue: environment.makeSearchViewModel())
         _catalogState = StateObject(wrappedValue: sharedCatalogState)
@@ -90,7 +92,10 @@ private struct MainTabView: View {
         _watchlistViewModel = StateObject(
             wrappedValue: environment.makeWatchlistViewModel(watchlistState: sharedWatchlistState)
         )
-        _profileViewModel = StateObject(wrappedValue: environment.makeProfileViewModel(session: session))
+        _historyState = StateObject(wrappedValue: sharedHistoryState)
+        _profileViewModel = StateObject(
+            wrappedValue: environment.makeProfileViewModel(session: session, historyState: sharedHistoryState)
+        )
     }
 
     var body: some View {
@@ -100,13 +105,15 @@ private struct MainTabView: View {
 
             WatchlistView(
                 viewModel: watchlistViewModel,
-                watchlistState: watchlistState
+                watchlistState: watchlistState,
+                historyState: historyState
             )
                 .tabItem { Label("Watchlist", systemImage: "bookmark") }
 
             SearchView(
                 viewModel: searchViewModel,
-                watchlistState: watchlistState
+                watchlistState: watchlistState,
+                historyState: historyState
             )
                 .tabItem { Label("Search", systemImage: "magnifyingglass") }
             
@@ -115,11 +122,13 @@ private struct MainTabView: View {
 
            
 
-            ProfileView(viewModel: profileViewModel)
+            ProfileView(viewModel: profileViewModel, historyState: historyState)
                 .tabItem { Label("Profile", systemImage: "person") }
         }
         .task {
-            await watchlistState.refresh()
+            async let watchlistRefresh: Void = watchlistState.refresh()
+            async let historyRefresh: Void = historyState.refresh()
+            _ = await (watchlistRefresh, historyRefresh)
         }
     }
 }

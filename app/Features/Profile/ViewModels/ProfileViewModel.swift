@@ -13,23 +13,38 @@ final class ProfileViewModel: ObservableObject {
     private let service: ProfileService
     private let authService: any AuthServicing
     private let session: SessionStore
+    private let historyState: HistoryState
+    private var hasLoadedOnce = false
 
-    init(service: ProfileService, authService: any AuthServicing, session: SessionStore) {
+    init(
+        service: ProfileService,
+        authService: any AuthServicing,
+        session: SessionStore,
+        historyState: HistoryState
+    ) {
         self.service = service
         self.authService = authService
         self.session = session
+        self.historyState = historyState
     }
 
-    func load() async {
+    func load(force: Bool = false) async {
+        if hasLoadedOnce && !force { return }
+
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
 
         do {
-            let user = try await service.fetchProfile()
+            async let profileTask = service.fetchProfile()
+            async let historyTask: Void = historyState.refresh(force: force)
+
+            let user = try await profileTask
+            await historyTask
             displayName = user.displayName ?? "User"
             fullName = user.fullName ?? ""
             email = user.email ?? ""
+            hasLoadedOnce = true
         } catch {
             errorMessage = "Failed to load profile"
         }

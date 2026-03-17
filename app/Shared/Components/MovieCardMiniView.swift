@@ -3,13 +3,39 @@ import SwiftUI
 struct MovieCardMiniView: View {
     let movie: Movie?
     let watchlistState: WatchlistState?
+    let historyState: HistoryState?
     let title: String
     let dateWatched: Date?
     let overview: String?
     let imageName: String?
     var prefix: String = "Watched on"
     var onTap: (() -> Void)? = nil
+    let onDetailPresentationChanged: ((Bool) -> Void)?
     @State private var showsDetailSheet = false
+
+    init(
+        movie: Movie?,
+        watchlistState: WatchlistState?,
+        historyState: HistoryState? = nil,
+        title: String,
+        dateWatched: Date?,
+        overview: String?,
+        imageName: String?,
+        prefix: String = "Watched on",
+        onTap: (() -> Void)? = nil,
+        onDetailPresentationChanged: ((Bool) -> Void)? = nil
+    ) {
+        self.movie = movie
+        self.watchlistState = watchlistState
+        self.historyState = historyState
+        self.title = title
+        self.dateWatched = dateWatched
+        self.overview = overview
+        self.imageName = imageName
+        self.prefix = prefix
+        self.onTap = onTap
+        self.onDetailPresentationChanged = onDetailPresentationChanged
+    }
 
     var body: some View {
         HStack {
@@ -38,9 +64,16 @@ struct MovieCardMiniView: View {
             showsDetailSheet = true
         }
         .sheet(isPresented: $showsDetailSheet) {
-            MovieDetailView(movie: detailMovie, watchlistState: watchlistState)
+            MovieDetailView(
+                movie: detailMovie,
+                watchlistState: watchlistState,
+                historyState: historyState
+            )
             .presentationDetents([.large, .large])
             .presentationDragIndicator(.visible)
+        }
+        .onChange(of: showsDetailSheet) { _, isPresented in
+            onDetailPresentationChanged?(isPresented)
         }
     }
 
@@ -91,10 +124,12 @@ struct MovieCardMiniView: View {
     MovieCardMiniView(
         movie: nil,
         watchlistState: nil,
+        historyState: nil,
         title: "Interstellar",
         dateWatched: Date(),
         overview: nil,
-        imageName: nil
+        imageName: nil,
+        onDetailPresentationChanged: nil
     )
         .padding()
 }

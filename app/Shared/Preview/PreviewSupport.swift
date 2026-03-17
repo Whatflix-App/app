@@ -54,10 +54,15 @@ enum PreviewSupport {
         watchlistState: watchlistState
     )
 
+    static let historyState = HistoryState(
+        service: ProfileService(apiClient: apiClient)
+    )
+
     static let profileViewModel = ProfileViewModel(
         service: ProfileService(apiClient: apiClient),
         authService: PreviewAuthService(),
-        session: session
+        session: session,
+        historyState: historyState
     )
 
     static let movieDetailViewModel = MovieDetailViewModel(

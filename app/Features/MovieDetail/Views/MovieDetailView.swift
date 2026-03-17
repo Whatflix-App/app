@@ -3,8 +3,10 @@ import UIKit
 
 struct MovieDetailView: View {
     let movie: Movie
+    private let movieDetailService: MovieDetailService
     private let watchlistService: WatchlistService
     private let watchlistState: WatchlistState?
+    private let historyState: HistoryState?
 
     @Environment(\.dismiss) private var dismiss
     @State private var appearSpin = true
@@ -12,21 +14,25 @@ struct MovieDetailView: View {
     @State private var backgroundGradient: LinearGradient?
     @State private var loadTask: Task<Void, Never>?
     @State private var isInWatchlist = false
-    @State private var isDisliked = false
-    @State private var isLiked = false
-    @State private var isNeutral = false
+    @State private var selectedRating: Int?
     @State private var isWatchlistLoading = false
+    @State private var isUserStateLoading = false
+    @State private var isRatingLoading = false
 
     private let maxContentWidth: CGFloat = 700
 
     init(
         movie: Movie,
+        movieDetailService: MovieDetailService = MovieDetailService(apiClient: AppEnvironment.live.apiClient),
         watchlistService: WatchlistService = WatchlistService(apiClient: AppEnvironment.live.apiClient),
-        watchlistState: WatchlistState? = nil
+        watchlistState: WatchlistState? = nil,
+        historyState: HistoryState? = nil
     ) {
         self.movie = movie
+        self.movieDetailService = movieDetailService
         self.watchlistService = watchlistService
         self.watchlistState = watchlistState
+        self.historyState = historyState
     }
 
     var body: some View {
@@ -109,20 +115,16 @@ struct MovieDetailView: View {
                     withAnimation(.snappy(duration: 0.35, extraBounce: 0.05)) {
                         appearSpin = false
                     }
-                    if let movieID = watchlistMovieID, let watchlistState {
-                        isInWatchlist = watchlistState.contains(movieID: movieID)
-                    }
                     loadImage()
+                    Task { await loadUserState() }
                 }
                 .onChange(of: movie.id) { _, _ in
                     loadedImage = nil
                     backgroundGradient = nil
-                    if let movieID = watchlistMovieID, let watchlistState {
-                        isInWatchlist = watchlistState.contains(movieID: movieID)
-                    } else {
-                        isInWatchlist = false
-                    }
+                    isInWatchlist = false
+                    selectedRating = nil
                     loadImage()
+                    Task { await loadUserState() }
                 }
                 .onDisappear {
                     loadTask?.cancel()
@@ -134,10 +136,9 @@ struct MovieDetailView: View {
                     HStack {
                         
                         Button {
-                            Task { //rating
-                            }
+                            Task { await updateRating(to: -1) }
                         } label: {
-                                Image(systemName: isDisliked ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                                Image(systemName: selectedRating == -1 ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
@@ -146,13 +147,13 @@ struct MovieDetailView: View {
                                         .fill(.black.opacity(0.35))
                                 )
                         }
+                        .disabled(isRatingLoading || movie.movieId == nil)
                         .padding(.leading, 50)
                         .padding(.bottom, 20)
                         Button {
-                            Task { //rating
-                            }
+                            Task { await updateRating(to: 0) }
                         } label: {
-                                Image(systemName: isNeutral ? "minus.circle.fill" : "minus.circle")
+                                Image(systemName: selectedRating == 0 ? "minus.circle.fill" : "minus.circle")
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
@@ -161,12 +162,12 @@ struct MovieDetailView: View {
                                         .fill(.black.opacity(0.35))
                                 )
                         }
+                        .disabled(isRatingLoading || movie.movieId == nil)
                         .padding(.bottom, 20)
                         Button {
-                            Task { //rating
-                            }
+                            Task { await updateRating(to: 1) }
                         } label: {
-                                Image(systemName: isLiked ? "hand.thumbsup.fill" : "hand.thumbsup")
+                                Image(systemName: selectedRating == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
@@ -175,6 +176,7 @@ struct MovieDetailView: View {
                                         .fill(.black.opacity(0.35))
                                 )
                         }
+                        .disabled(isRatingLoading || movie.movieId == nil)
                         .padding(.bottom, 20)
                         Spacer()
                         Button {
@@ -190,6 +192,7 @@ struct MovieDetailView: View {
                                 )
                         }
                         .buttonStyle(.plain)
+                        .disabled(isWatchlistLoading || movie.movieId == nil)
                         .accessibilityLabel(isInWatchlist ? "Remove from watchlist" : "Add to watchlist")
                         .padding(.trailing, 50)
                         .padding(.bottom, 20)
@@ -319,6 +322,33 @@ private extension MovieDetailView {
     }
 
     @MainActor
+    func loadUserState() async {
+        guard let movieID = watchlistMovieID else { return }
+        guard !isUserStateLoading else { return }
+
+        isUserStateLoading = true
+        defer { isUserStateLoading = false }
+
+        do {
+            let userState = try await movieDetailService.fetchUserState(movieID: movieID)
+            isInWatchlist = userState.inWatchlist
+            selectedRating = userState.rating?.value
+
+            if let watchlistState {
+                if userState.inWatchlist {
+                    watchlistState.markAdded(movieID: movieID)
+                } else {
+                    watchlistState.markRemoved(movieID: movieID)
+                }
+            }
+        } catch {
+            if let watchlistState {
+                isInWatchlist = watchlistState.contains(movieID: movieID)
+            }
+        }
+    }
+
+    @MainActor
     func toggleWatchlist() async {
         guard let movieID = watchlistMovieID else { return }
         if isWatchlistLoading { return }
@@ -346,6 +376,36 @@ private extension MovieDetailView {
             }
         } catch {
             isInWatchlist = wasInWatchlist
+        }
+    }
+
+    @MainActor
+    func updateRating(to value: Int) async {
+        guard let movieID = movie.movieId else { return }
+        guard !isRatingLoading else { return }
+
+        let previousRating = selectedRating
+        let isClearing = selectedRating == value
+        selectedRating = isClearing ? nil : value
+        isRatingLoading = true
+        defer { isRatingLoading = false }
+
+        do {
+            if isClearing {
+                _ = try await movieDetailService.clearMovieRating(movieID: movieID)
+                selectedRating = nil
+                historyState?.removeRatingEntry(movieID: movieID)
+            } else {
+                let response = try await movieDetailService.rateMovie(movieID: movieID, rating: value)
+                selectedRating = response.rating.value
+                historyState?.upsertRatingEntry(
+                    movie: movie,
+                    movieID: movieID,
+                    watchedAt: response.rating.updatedAt
+                )
+            }
+        } catch {
+            selectedRating = previousRating
         }
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct MovieCardPreview: View {
     let movie: Movie?
     let watchlistState: WatchlistState?
+    let historyState: HistoryState?
     let title: String
     let subtitle: String?
     let imageName: String?
@@ -19,6 +20,7 @@ struct MovieCardPreview: View {
     init(
         movie: Movie? = nil,
         watchlistState: WatchlistState? = nil,
+        historyState: HistoryState? = nil,
         title: String = "Everything Everywhere All at Once",
         subtitle: String? = "Action · Comedy · Sci-Fi",
         imageName: String? = nil,
@@ -30,6 +32,7 @@ struct MovieCardPreview: View {
     ) {
         self.movie = movie
         self.watchlistState = watchlistState
+        self.historyState = historyState
         self.title = title
         self.subtitle = subtitle
         self.imageName = imageName
@@ -106,7 +109,11 @@ struct MovieCardPreview: View {
             onDetailPresentationChanged?(isPresented)
         }
         .sheet(isPresented: $showsDetailSheet) {
-            MovieDetailView(movie: detailMovie, watchlistState: watchlistState)
+            MovieDetailView(
+                movie: detailMovie,
+                watchlistState: watchlistState,
+                historyState: historyState
+            )
             .presentationDetents([.large, .large])
             .presentationDragIndicator(.visible)
         }
