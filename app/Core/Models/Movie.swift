@@ -5,6 +5,7 @@ struct Movie: Identifiable, Hashable, Codable {
     let title: String
     let overview: String
     let genres: [String]
+    let addedAt: Date?
     let movieId: String?
     let backdropPath: String?
     let releaseDate: String?
@@ -19,6 +20,7 @@ struct Movie: Identifiable, Hashable, Codable {
         title: String,
         overview: String,
         genres: [String] = [],
+        addedAt: Date? = nil,
         movieId: String? = nil,
         backdropPath: String? = nil,
         releaseDate: String? = nil,
@@ -32,6 +34,7 @@ struct Movie: Identifiable, Hashable, Codable {
         self.title = title
         self.overview = overview
         self.genres = genres
+        self.addedAt = addedAt
         self.movieId = movieId
         self.backdropPath = backdropPath
         self.releaseDate = releaseDate

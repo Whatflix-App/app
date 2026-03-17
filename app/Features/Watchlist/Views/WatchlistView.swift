@@ -35,7 +35,7 @@ struct WatchlistView: View {
                                 title: movie.title,
                                 subtitle: movie.overview,
                                 imageName: movie.backdropPath,
-                                dateAdded: Date(),
+                                dateAdded: movie.addedAt,
                                 cornerRadius: 20,
                                 aspectRatio: 16 / 9,
                                 showBorder: false,
@@ -54,6 +54,7 @@ struct WatchlistView: View {
                         }
                     }
                 }
+                .scrollIndicators(.hidden)
             }
             .overlay(alignment: .top) {
                 WatchlistTopFeather()

@@ -90,6 +90,7 @@ final class WatchlistService {
             title: dto.title,
             overview: dto.overview.isEmpty ? (item.notes ?? "Saved to watchlist") : dto.overview,
             genres: dto.genres,
+            addedAt: item.addedAt,
             movieId: dto.movieId,
             backdropPath: dto.backdropPath,
             releaseDate: dto.releaseDate,

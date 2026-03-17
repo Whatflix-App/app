@@ -12,6 +12,9 @@ extension Date {
         if calendar.isDateInToday(self) {
             return "Today"
         }
+        if calendar.isDateInYesterday(self) {
+            return "Yesterday"
+        }
 
         let startOfNow = calendar.startOfDay(for: Date())
         let startOfDate = calendar.startOfDay(for: self)

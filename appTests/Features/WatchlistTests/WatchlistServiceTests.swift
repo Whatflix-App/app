@@ -53,6 +53,7 @@ struct WatchlistServiceTests {
         #expect(movies.count == 1)
         #expect(movies[0].movieId == "10138")
         #expect(movies[0].title == "Iron Man 2")
+        #expect(movies[0].addedAt == ISO8601DateFormatter().date(from: "2026-03-08T00:00:00Z"))
 
         #expect(apiClient.sentRequests.count == 3)
         #expect(apiClient.sentRequests[0].path == "watchlist")
