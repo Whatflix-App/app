@@ -10,7 +10,8 @@ final class APIClient: APIClienting {
     private let tokenStore: AuthTokenStore
 
     init(
-        baseURL: URL = URL(string: "https://api.whatflix.ai")!,
+//        baseURL: URL = URL(string: "https://api.whatflix.ai")!,
+        baseURL: URL = URL(string: "http://192.168.1.17:8000")!,
         session: URLSession = .shared,
         tokenStore: AuthTokenStore = AuthTokenStore()
     ) {

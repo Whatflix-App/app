@@ -29,6 +29,7 @@ final class ProfileService {
         let genres: [String]
         let backdropPath: String?
         let releaseDate: String?
+        let runtimeMinutes: Int?
         let voteAverage: Double
         let voteCount: Int
         let popularity: Double
@@ -102,6 +103,7 @@ final class ProfileService {
             movieId: dto.movieId,
             backdropPath: dto.backdropPath,
             releaseDate: dto.releaseDate,
+            runtimeMinutes: dto.runtimeMinutes,
             voteAverage: dto.voteAverage,
             voteCount: dto.voteCount,
             popularity: dto.popularity,

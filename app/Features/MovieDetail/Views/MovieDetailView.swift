@@ -9,12 +9,14 @@ struct MovieDetailView: View {
     private let historyState: HistoryState?
 
     @Environment(\.dismiss) private var dismiss
+    @State private var detailedMovie: Movie?
     @State private var appearSpin = true
     @State private var loadedImage: UIImage?
     @State private var backgroundGradient: LinearGradient?
     @State private var loadTask: Task<Void, Never>?
     @State private var isInWatchlist = false
     @State private var selectedRating: Int?
+    @State private var isMovieDetailLoading = false
     @State private var isWatchlistLoading = false
     @State private var isUserStateLoading = false
     @State private var isRatingLoading = false
@@ -33,6 +35,7 @@ struct MovieDetailView: View {
         self.watchlistService = watchlistService
         self.watchlistState = watchlistState
         self.historyState = historyState
+        _detailedMovie = State(initialValue: nil)
     }
 
     var body: some View {
@@ -53,13 +56,18 @@ struct MovieDetailView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 6) {
-                                        Text(movie.title)
+                                        Text(displayMovie.title)
                                             .font(.title2).bold()
                                             .foregroundStyle(.primary)
                                         Text(genreLabel)
                                             .font(.subheadline)
                                             .foregroundStyle(.secondary)
                                             .lineLimit(2)
+                                        if let metadataLabel {
+                                            Text(metadataLabel)
+                                                .font(.subheadline)
+                                                .foregroundStyle(.secondary)
+                                        }
                                     }
                                     Spacer()
                                     Button {
@@ -116,14 +124,17 @@ struct MovieDetailView: View {
                         appearSpin = false
                     }
                     loadImage()
+                    Task { await loadMovieDetail() }
                     Task { await loadUserState() }
                 }
                 .onChange(of: movie.id) { _, _ in
+                    detailedMovie = nil
                     loadedImage = nil
                     backgroundGradient = nil
                     isInWatchlist = false
                     selectedRating = nil
                     loadImage()
+                    Task { await loadMovieDetail() }
                     Task { await loadUserState() }
                 }
                 .onDisappear {
@@ -222,8 +233,12 @@ struct MovieDetailView: View {
 }
 
 private extension MovieDetailView {
+    var displayMovie: Movie {
+        detailedMovie ?? movie
+    }
+
     var imageName: String {
-        movie.backdropPath ?? ""
+        displayMovie.backdropPath ?? ""
     }
 
     var imageURL: URL? {
@@ -240,8 +255,8 @@ private extension MovieDetailView {
     func loadImage() {
         loadTask?.cancel()
         loadTask = Task {
-            let image = await ImageRepository.shared.image(for: movie)
-            let palette = await ImageRepository.shared.palette(for: movie)
+            let image = await ImageRepository.shared.image(for: displayMovie)
+            let palette = await ImageRepository.shared.palette(for: displayMovie)
             if Task.isCancelled { return }
             loadedImage = image
             if let gradient = AppStyle.gradient(from: palette) {
@@ -279,32 +294,58 @@ private extension MovieDetailView {
     }
 
     var qualityScoreLabel: String {
-        guard let voteAverage = movie.voteAverage else { return "N/A" }
+        guard let voteAverage = displayMovie.voteAverage else { return "N/A" }
         return String(format: "%.1f/10", voteAverage)
     }
 
     var genreLabel: String {
-        if !movie.genres.isEmpty {
-            return movie.genres.prefix(3).joined(separator: " • ")
+        if !displayMovie.genres.isEmpty {
+            return displayMovie.genres.prefix(3).joined(separator: " • ")
         }
         return "Genre unavailable"
     }
 
     var confidenceLabel: String {
-        guard let voteCount = movie.voteCount else { return "Unknown" }
+        guard let voteCount = displayMovie.voteCount else { return "Unknown" }
         if voteCount >= 1000 { return "High" }
         if voteCount >= 100 { return "Medium" }
         return "Low"
     }
 
     var voteCountBadgeValue: String {
-        guard let voteCount = movie.voteCount else { return "N/A" }
+        guard let voteCount = displayMovie.voteCount else { return "N/A" }
         return formatVotes(voteCount)
     }
 
     var overviewText: String {
-        let trimmed = movie.overview.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = displayMovie.overview.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? "Overview unavailable." : trimmed
+    }
+
+    var releaseYear: String? {
+        guard let releaseDate = displayMovie.releaseDate, releaseDate.count >= 4 else { return nil }
+        return String(releaseDate.prefix(4))
+    }
+
+    var runtimeLabel: String? {
+        guard let runtimeMinutes = displayMovie.runtimeMinutes, runtimeMinutes > 0 else { return nil }
+        let hours = runtimeMinutes / 60
+        let minutes = runtimeMinutes % 60
+
+        if hours > 0 && minutes > 0 {
+            return "\(hours)h \(minutes)m"
+        }
+        if hours > 0 {
+            return "\(hours)h"
+        }
+        return "\(minutes)m"
+    }
+
+    var metadataLabel: String? {
+        [releaseYear, runtimeLabel]
+            .compactMap { $0 }
+            .joined(separator: " • ")
+            .nilIfEmpty
     }
 
     func formatVotes(_ count: Int) -> String {
@@ -318,7 +359,23 @@ private extension MovieDetailView {
     }
 
     var watchlistMovieID: String? {
-        movie.movieId
+        displayMovie.movieId
+    }
+
+    @MainActor
+    func loadMovieDetail() async {
+        guard let movieID = movie.movieId else { return }
+        guard !isMovieDetailLoading else { return }
+
+        isMovieDetailLoading = true
+        defer { isMovieDetailLoading = false }
+
+        do {
+            detailedMovie = try await movieDetailService.fetchMovieDetail(movieID: movieID)
+            loadImage()
+        } catch {
+            detailedMovie = nil
+        }
     }
 
     @MainActor
@@ -399,7 +456,7 @@ private extension MovieDetailView {
                 let response = try await movieDetailService.rateMovie(movieID: movieID, rating: value)
                 selectedRating = response.rating.value
                 historyState?.upsertRatingEntry(
-                    movie: movie,
+                    movie: displayMovie,
                     movieID: movieID,
                     watchedAt: response.rating.updatedAt
                 )
@@ -416,12 +473,20 @@ private extension Array {
     }
 }
 
+private extension String {
+    var nilIfEmpty: String? {
+        isEmpty ? nil : self
+    }
+}
+
 #Preview {
     MovieDetailView(
         movie: Movie(
             id: UUID(),
             title: "Everything Everywhere All At Once",
             overview: "In a galaxy far far away...",
+            releaseDate: "2022-03-25",
+            runtimeMinutes: 139,
             voteAverage: 7.8,
             voteCount: 2143
         ),

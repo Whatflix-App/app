@@ -3,6 +3,40 @@ import Testing
 @testable import app
 
 struct MovieDetailServiceTests {
+    @Test func fetchMovieDetailUsesSearchMovieRouteAndDecodesRuntime() async throws {
+        let apiClient = MockAPIClient()
+        apiClient.nextData = """
+        {
+          "movieId": "603",
+          "title": "The Matrix",
+          "overview": "A hacker discovers the truth.",
+          "genreIds": [28, 878],
+          "genres": ["Action", "Sci-Fi"],
+          "backdropPath": "/matrix.jpg",
+          "releaseDate": "1999-03-31",
+          "runtimeMinutes": 136,
+          "voteAverage": 8.7,
+          "voteCount": 25000,
+          "popularity": 70.0,
+          "adult": false,
+          "originalLanguage": "en"
+        }
+        """.data(using: .utf8) ?? Data()
+
+        let service = MovieDetailService(apiClient: apiClient)
+        let movie = try await service.fetchMovieDetail(movieID: "603")
+
+        #expect(movie.movieId == "603")
+        #expect(movie.title == "The Matrix")
+        #expect(movie.releaseDate == "1999-03-31")
+        #expect(movie.runtimeMinutes == 136)
+
+        let request = try #require(apiClient.sentRequests.first)
+        #expect(request.path == "search/movies/603?language=en-US")
+        #expect(request.method == "GET")
+        #expect(request.requiresAuth)
+    }
+
     @Test func fetchUserStateUsesCombinedRouteAndDecodesResponse() async throws {
         let apiClient = MockAPIClient()
         apiClient.nextData = """

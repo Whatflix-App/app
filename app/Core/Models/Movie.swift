@@ -9,6 +9,7 @@ struct Movie: Identifiable, Hashable, Codable {
     let movieId: String?
     let backdropPath: String?
     let releaseDate: String?
+    let runtimeMinutes: Int?
     let voteAverage: Double?
     let voteCount: Int?
     let popularity: Double?
@@ -24,6 +25,7 @@ struct Movie: Identifiable, Hashable, Codable {
         movieId: String? = nil,
         backdropPath: String? = nil,
         releaseDate: String? = nil,
+        runtimeMinutes: Int? = nil,
         voteAverage: Double? = nil,
         voteCount: Int? = nil,
         popularity: Double? = nil,
@@ -38,6 +40,7 @@ struct Movie: Identifiable, Hashable, Codable {
         self.movieId = movieId
         self.backdropPath = backdropPath
         self.releaseDate = releaseDate
+        self.runtimeMinutes = runtimeMinutes
         self.voteAverage = voteAverage
         self.voteCount = voteCount
         self.popularity = popularity
