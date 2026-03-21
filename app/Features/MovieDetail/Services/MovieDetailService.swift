@@ -1,6 +1,14 @@
 import Foundation
 
 final class MovieDetailService {
+    private struct CastMemberDTO: Decodable {
+        let personId: String
+        let name: String
+        let character: String?
+        let profilePath: String?
+        let order: Int?
+    }
+
     private struct SearchMovieItemDTO: Decodable {
         let movieId: String
         let title: String
@@ -15,6 +23,8 @@ final class MovieDetailService {
         let popularity: Double
         let adult: Bool
         let originalLanguage: String?
+        let director: String?
+        let cast: [CastMemberDTO]
     }
 
     struct UserState: Decodable {
@@ -68,7 +78,17 @@ final class MovieDetailService {
                 voteCount: dto.voteCount,
                 popularity: dto.popularity,
                 adult: dto.adult,
-                originalLanguage: dto.originalLanguage
+                originalLanguage: dto.originalLanguage,
+                director: dto.director,
+                cast: dto.cast.map {
+                    Movie.Person(
+                        id: $0.personId,
+                        name: $0.name,
+                        role: $0.character,
+                        profilePath: $0.profilePath,
+                        order: $0.order
+                    )
+                }
             )
         } catch {
             throw NetworkError.decodingFailed

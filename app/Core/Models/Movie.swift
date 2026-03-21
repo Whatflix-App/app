@@ -1,6 +1,14 @@
 import Foundation
 
 struct Movie: Identifiable, Hashable, Codable {
+    struct Person: Hashable, Codable, Identifiable {
+        let id: String
+        let name: String
+        let role: String?
+        let profilePath: String?
+        let order: Int?
+    }
+
     let id: UUID
     let title: String
     let overview: String
@@ -15,6 +23,8 @@ struct Movie: Identifiable, Hashable, Codable {
     let popularity: Double?
     let adult: Bool?
     let originalLanguage: String?
+    let director: String?
+    let cast: [Person]
 
     init(
         id: UUID,
@@ -30,7 +40,9 @@ struct Movie: Identifiable, Hashable, Codable {
         voteCount: Int? = nil,
         popularity: Double? = nil,
         adult: Bool? = nil,
-        originalLanguage: String? = nil
+        originalLanguage: String? = nil,
+        director: String? = nil,
+        cast: [Person] = []
     ) {
         self.id = id
         self.title = title
@@ -46,5 +58,7 @@ struct Movie: Identifiable, Hashable, Codable {
         self.popularity = popularity
         self.adult = adult
         self.originalLanguage = originalLanguage
+        self.director = director
+        self.cast = cast
     }
 }

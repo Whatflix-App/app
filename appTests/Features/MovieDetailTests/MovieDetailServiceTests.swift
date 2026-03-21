@@ -19,7 +19,17 @@ struct MovieDetailServiceTests {
           "voteCount": 25000,
           "popularity": 70.0,
           "adult": false,
-          "originalLanguage": "en"
+          "originalLanguage": "en",
+          "director": "The Wachowskis",
+          "cast": [
+            {
+              "personId": "6384",
+              "name": "Keanu Reeves",
+              "character": "Neo",
+              "profilePath": "/keanu.jpg",
+              "order": 0
+            }
+          ]
         }
         """.data(using: .utf8) ?? Data()
 
@@ -30,6 +40,9 @@ struct MovieDetailServiceTests {
         #expect(movie.title == "The Matrix")
         #expect(movie.releaseDate == "1999-03-31")
         #expect(movie.runtimeMinutes == 136)
+        #expect(movie.director == "The Wachowskis")
+        #expect(movie.cast.count == 1)
+        #expect(movie.cast.first?.name == "Keanu Reeves")
 
         let request = try #require(apiClient.sentRequests.first)
         #expect(request.path == "search/movies/603?language=en-US")
