@@ -13,6 +13,7 @@ final class SearchService: SearchServicing {
         let genres: [String]
         let backdropPath: String?
         let releaseDate: String?
+        let runtimeMinutes: Int?
         let voteAverage: Double
         let voteCount: Int
         let popularity: Double
@@ -46,6 +47,7 @@ final class SearchService: SearchServicing {
                     movieId: item.movieId,
                     backdropPath: item.backdropPath,
                     releaseDate: item.releaseDate,
+                    runtimeMinutes: item.runtimeMinutes,
                     voteAverage: item.voteAverage,
                     voteCount: item.voteCount,
                     popularity: item.popularity,

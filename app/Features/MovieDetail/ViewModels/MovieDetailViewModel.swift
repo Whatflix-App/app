@@ -12,7 +12,7 @@ final class MovieDetailViewModel: ObservableObject {
         self.service = service
     }
 
-    func load(movieID: UUID) async {
-        _ = try? await service.fetchMovieDetail(id: movieID)
+    func load(movieID: String) async {
+        _ = try? await service.fetchMovieDetail(movieID: movieID)
     }
 }

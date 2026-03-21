@@ -9,15 +9,19 @@ struct MovieDetailView: View {
     private let historyState: HistoryState?
 
     @Environment(\.dismiss) private var dismiss
+    @State private var detailedMovie: Movie?
     @State private var appearSpin = true
     @State private var loadedImage: UIImage?
     @State private var backgroundGradient: LinearGradient?
     @State private var loadTask: Task<Void, Never>?
     @State private var isInWatchlist = false
     @State private var selectedRating: Int?
+    @State private var isMovieDetailLoading = false
     @State private var isWatchlistLoading = false
     @State private var isUserStateLoading = false
     @State private var isRatingLoading = false
+    @State private var isOverviewExpanded = false
+    @State private var isPeopleExpanded = false
 
     private let maxContentWidth: CGFloat = 700
 
@@ -33,6 +37,7 @@ struct MovieDetailView: View {
         self.watchlistService = watchlistService
         self.watchlistState = watchlistState
         self.historyState = historyState
+        _detailedMovie = State(initialValue: nil)
     }
 
     var body: some View {
@@ -53,7 +58,7 @@ struct MovieDetailView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 6) {
-                                        Text(movie.title)
+                                        Text(displayMovie.title)
                                             .font(.title2).bold()
                                             .foregroundStyle(.primary)
                                         Text(genreLabel)
@@ -76,32 +81,42 @@ struct MovieDetailView: View {
                                     .accessibilityLabel("Close")
                                 }
 
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Ratings")
-                                        .font(.headline)
-                                    ScrollView(.horizontal, showsIndicators: false) {
-                                        HStack(spacing: 12) {
-                                            ratingBadge(title: "TMDB", value: qualityScoreLabel)
-                                                .fixedSize(horizontal: true, vertical: false)
-                                            ratingBadge(title: "Confidence", value: confidenceLabel)
-                                                .fixedSize(horizontal: true, vertical: false)
-                                            ratingBadge(title: "Votes", value: voteCountBadgeValue)
-                                                .fixedSize(horizontal: true, vertical: false)
-                                        }
-                                    }
+                                HStack(spacing: 12) {
+                                    ratingBadge(title: "TMDB", value: qualityScoreLabel)
+                                        .fixedSize(horizontal: true, vertical: false)
+                                    ratingBadge(title: "Year", value: releaseYear ?? "N/A")
+                                        .fixedSize(horizontal: true, vertical: false)
+                                    ratingBadge(title: "Runtime", value: runtimeLabel ?? "N/A")
+                                        .fixedSize(horizontal: true, vertical: false)
                                 }
+                                .frame(maxWidth: .infinity, alignment: .center)
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text("Overview")
                                         .font(.headline)
                                     Text(overviewText)
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
-                                        .lineLimit(6)
+                                        .lineLimit(isOverviewExpanded ? nil : 6)
+                                        .contentTransition(.interpolate)
+                                    if canExpandOverview {
+                                        Text(isOverviewExpanded ? "Tap to collapse" : "Tap to read more")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    guard canExpandOverview else { return }
+                                    withAnimation(.snappy(duration: 0.25, extraBounce: 0.02)) {
+                                        isOverviewExpanded.toggle()
+                                    }
                                 }
 
                             }
                             .padding(20)
                             .glassEffect(in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+
+                            peoplePanel
                         }
                         .padding(16)
                         .frame(width: contentWidth, alignment: .center)
@@ -116,14 +131,19 @@ struct MovieDetailView: View {
                         appearSpin = false
                     }
                     loadImage()
+                    Task { await loadMovieDetail() }
                     Task { await loadUserState() }
                 }
                 .onChange(of: movie.id) { _, _ in
+                    detailedMovie = nil
                     loadedImage = nil
                     backgroundGradient = nil
                     isInWatchlist = false
                     selectedRating = nil
+                    isOverviewExpanded = false
+                    isPeopleExpanded = false
                     loadImage()
+                    Task { await loadMovieDetail() }
                     Task { await loadUserState() }
                 }
                 .onDisappear {
@@ -142,10 +162,7 @@ struct MovieDetailView: View {
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
-                                .background(
-                                    Circle()
-                                        .fill(.black.opacity(0.35))
-                                )
+                                .glassEffect(.clear.tint(.black.opacity(0.3)), in: Circle())
                         }
                         .disabled(isRatingLoading || movie.movieId == nil)
                         .padding(.leading, 50)
@@ -157,10 +174,7 @@ struct MovieDetailView: View {
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
-                                .background(
-                                    Circle()
-                                        .fill(.black.opacity(0.35))
-                                )
+                                .glassEffect(.clear.tint(.black.opacity(0.3)), in: Circle())
                         }
                         .disabled(isRatingLoading || movie.movieId == nil)
                         .padding(.bottom, 20)
@@ -171,10 +185,7 @@ struct MovieDetailView: View {
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
-                                .background(
-                                    Circle()
-                                        .fill(.black.opacity(0.35))
-                                )
+                                .glassEffect(.clear.tint(.black.opacity(0.3)), in: Circle())
                         }
                         .disabled(isRatingLoading || movie.movieId == nil)
                         .padding(.bottom, 20)
@@ -186,10 +197,7 @@ struct MovieDetailView: View {
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
-                                .background(
-                                    Circle()
-                                        .fill(.black.opacity(0.35))
-                                )
+                                .glassEffect(.clear.tint(.black.opacity(0.3)), in: Circle())
                         }
                         .buttonStyle(.plain)
                         .disabled(isWatchlistLoading || movie.movieId == nil)
@@ -203,17 +211,17 @@ struct MovieDetailView: View {
     }
 
     private func ratingBadge(title: String, value: String) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 4) {
             Text(value)
-                .font(.headline).bold()
+                .font(.subheadline).bold()
                 .lineLimit(1)
             Text(title)
-                .font(.caption)
+                .font(.caption2)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(.ultraThinMaterial)
@@ -222,8 +230,12 @@ struct MovieDetailView: View {
 }
 
 private extension MovieDetailView {
+    var displayMovie: Movie {
+        detailedMovie ?? movie
+    }
+
     var imageName: String {
-        movie.backdropPath ?? ""
+        displayMovie.backdropPath ?? ""
     }
 
     var imageURL: URL? {
@@ -240,8 +252,8 @@ private extension MovieDetailView {
     func loadImage() {
         loadTask?.cancel()
         loadTask = Task {
-            let image = await ImageRepository.shared.image(for: movie)
-            let palette = await ImageRepository.shared.palette(for: movie)
+            let image = await ImageRepository.shared.image(for: displayMovie)
+            let palette = await ImageRepository.shared.palette(for: displayMovie)
             if Task.isCancelled { return }
             loadedImage = image
             if let gradient = AppStyle.gradient(from: palette) {
@@ -279,46 +291,214 @@ private extension MovieDetailView {
     }
 
     var qualityScoreLabel: String {
-        guard let voteAverage = movie.voteAverage else { return "N/A" }
+        guard let voteAverage = displayMovie.voteAverage else { return "N/A" }
         return String(format: "%.1f/10", voteAverage)
     }
 
     var genreLabel: String {
-        if !movie.genres.isEmpty {
-            return movie.genres.prefix(3).joined(separator: " • ")
+        if !displayMovie.genres.isEmpty {
+            return displayMovie.genres.prefix(3).joined(separator: " • ")
         }
         return "Genre unavailable"
     }
 
-    var confidenceLabel: String {
-        guard let voteCount = movie.voteCount else { return "Unknown" }
-        if voteCount >= 1000 { return "High" }
-        if voteCount >= 100 { return "Medium" }
-        return "Low"
-    }
-
-    var voteCountBadgeValue: String {
-        guard let voteCount = movie.voteCount else { return "N/A" }
-        return formatVotes(voteCount)
-    }
-
     var overviewText: String {
-        let trimmed = movie.overview.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = displayMovie.overview.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? "Overview unavailable." : trimmed
     }
 
-    func formatVotes(_ count: Int) -> String {
-        if count >= 1000000 {
-            return String(format: "%.1fM", Double(count) / 1000000.0)
+    var canExpandOverview: Bool {
+        overviewText != "Overview unavailable." && overviewText.count > 220
+    }
+
+    var releaseYear: String? {
+        guard let releaseDate = displayMovie.releaseDate, releaseDate.count >= 4 else { return nil }
+        return String(releaseDate.prefix(4))
+    }
+
+    var runtimeLabel: String? {
+        guard let runtimeMinutes = displayMovie.runtimeMinutes, runtimeMinutes > 0 else { return nil }
+        let hours = runtimeMinutes / 60
+        let minutes = runtimeMinutes % 60
+
+        if hours > 0 && minutes > 0 {
+            return "\(hours)h \(minutes)m"
         }
-        if count >= 1000 {
-            return String(format: "%.1fk", Double(count) / 1000.0)
+        if hours > 0 {
+            return "\(hours)h"
         }
-        return "\(count)"
+        return "\(minutes)m"
+    }
+
+    var hasPeopleContent: Bool {
+        displayMovie.director != nil || !displayMovie.cast.isEmpty
+    }
+
+    @ViewBuilder
+    var peoplePanel: some View {
+        if hasPeopleContent {
+            VStack(alignment: .leading, spacing: isPeopleExpanded ? 18 : 12) {
+                Button {
+                    withAnimation(.snappy(duration: 0.3, extraBounce: 0.04)) {
+                        isPeopleExpanded.toggle()
+                    }
+                } label: {
+                    HStack(alignment: .center, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("People")
+                                .font(.headline)
+                                .foregroundStyle(.primary)
+                            Text(isPeopleExpanded ? "Director and top cast" : "Tap to view director and cast")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        if !displayMovie.cast.isEmpty {
+                            collapsedPeopleAvatars
+                        }
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                if isPeopleExpanded {
+                    VStack(alignment: .leading, spacing: 16) {
+                        if let director = displayMovie.director {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Director")
+                                    .font(.caption)
+                                    .textCase(.uppercase)
+                                    .foregroundStyle(.secondary)
+                                Text(director)
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                            }
+                        }
+
+                        if !displayMovie.cast.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Top Cast")
+                                    .font(.caption)
+                                    .textCase(.uppercase)
+                                    .foregroundStyle(.secondary)
+
+                                ForEach(displayMovie.cast) { person in
+                                    HStack(spacing: 12) {
+                                        personAvatar(person, size: 52)
+
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(person.name)
+                                                .font(.body.weight(.semibold))
+                                                .foregroundStyle(.primary)
+                                            if let role = person.role, !role.isEmpty {
+                                                Text(role)
+                                                    .font(.subheadline)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+
+                                        Spacer()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            }
+            .padding(20)
+            .glassEffect(in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        }
+    }
+
+    var collapsedPeopleAvatars: some View {
+        HStack(spacing: -16) {
+            ForEach(Array(displayMovie.cast.prefix(4).enumerated()), id: \.element.id) { index, person in
+                personAvatar(person, size: 38)
+                    .zIndex(Double(displayMovie.cast.count - index))
+            }
+        }
+        .frame(height: 38)
+    }
+
+    @ViewBuilder
+    func personAvatar(_ person: Movie.Person, size: CGFloat) -> some View {
+        if let url = profileURL(for: person.profilePath) {
+            let imageSize = max(size - 4, 1)
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: imageSize, height: imageSize)
+                        .clipShape(Circle())
+                case .empty:
+                    ProgressView()
+                        .tint(.white.opacity(0.9))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .glassEffect(in: Circle())
+                case .failure:
+                    avatarFallback(size: size)
+                @unknown default:
+                    avatarFallback(size: size)
+                }
+            }
+            .frame(width: size, height: size)
+            .background(
+                Circle()
+                    .fill(.clear)
+                    .glassEffect(in: Circle())
+            )
+        } else {
+            avatarFallback(size: size)
+        }
+    }
+
+    func avatarFallback(size: CGFloat) -> some View {
+        Circle()
+            .overlay(
+                Image(systemName: "person.fill")
+                    .font(.system(size: size * 0.36, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+            )
+            .glassEffect(in: Circle())
+            .frame(width: size, height: size)
+    }
+
+    func profileURL(for profilePath: String?) -> URL? {
+        guard let path = profilePath?.trimmingCharacters(in: .whitespacesAndNewlines), !path.isEmpty else {
+            return nil
+        }
+        if path.hasPrefix("http") {
+            return URL(string: path)
+        }
+        if path.hasPrefix("/") {
+            return URL(string: "https://image.tmdb.org/t/p/w185\(path)")
+        }
+        return nil
     }
 
     var watchlistMovieID: String? {
-        movie.movieId
+        displayMovie.movieId
+    }
+
+    @MainActor
+    func loadMovieDetail() async {
+        guard let movieID = movie.movieId else { return }
+        guard !isMovieDetailLoading else { return }
+
+        isMovieDetailLoading = true
+        defer { isMovieDetailLoading = false }
+
+        do {
+            detailedMovie = try await movieDetailService.fetchMovieDetail(movieID: movieID)
+            loadImage()
+        } catch {
+            detailedMovie = nil
+        }
     }
 
     @MainActor
@@ -399,7 +579,7 @@ private extension MovieDetailView {
                 let response = try await movieDetailService.rateMovie(movieID: movieID, rating: value)
                 selectedRating = response.rating.value
                 historyState?.upsertRatingEntry(
-                    movie: movie,
+                    movie: displayMovie,
                     movieID: movieID,
                     watchedAt: response.rating.updatedAt
                 )
@@ -416,14 +596,48 @@ private extension Array {
     }
 }
 
+private extension String {
+    var nilIfEmpty: String? {
+        isEmpty ? nil : self
+    }
+}
+
 #Preview {
     MovieDetailView(
         movie: Movie(
             id: UUID(),
             title: "Everything Everywhere All At Once",
-            overview: "In a galaxy far far away...",
+            overview: "When an interdimensional rupture unravels reality, an unlikely hero has to reconnect with her family to hold everything together.",
+            genres: ["Sci-Fi", "Adventure", "Comedy"],
+            backdropPath: "/ss0Os3uWJfQAENILHZUdX8Tt1OC.jpg",
+            releaseDate: "2022-03-25",
+            runtimeMinutes: 139,
             voteAverage: 7.8,
-            voteCount: 2143
+            voteCount: 2143,
+            director: "Daniel Kwan, Daniel Scheinert",
+            cast: [
+                .init(
+                    id: "1",
+                    name: "Michelle Yeoh",
+                    role: "Evelyn Wang",
+                    profilePath: "/1j8kqVLg6s3g8u0D9w0w0Fz8R4f.jpg",
+                    order: 0
+                ),
+                .init(
+                    id: "2",
+                    name: "Ke Huy Quan",
+                    role: "Waymond Wang",
+                    profilePath: "/v48a6UH7x3cvLqDE7K5K4je2xQf.jpg",
+                    order: 1
+                ),
+                .init(
+                    id: "3",
+                    name: "Stephanie Hsu",
+                    role: "Joy Wang",
+                    profilePath: "/nM8w5K5e9qg2Yh6U6j2Jq8bK7m5.jpg",
+                    order: 2
+                )
+            ]
         ),
         watchlistService: WatchlistService(apiClient: PreviewSupport.apiClient)
     )
