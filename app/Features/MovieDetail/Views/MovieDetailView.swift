@@ -162,7 +162,7 @@ struct MovieDetailView: View {
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
-                                .glassEffect(in: Circle())
+                                .glassEffect(.clear.tint(.black.opacity(0.3)), in: Circle())
                         }
                         .disabled(isRatingLoading || movie.movieId == nil)
                         .padding(.leading, 50)
@@ -174,7 +174,7 @@ struct MovieDetailView: View {
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
-                                .glassEffect(in: Circle())
+                                .glassEffect(.clear.tint(.black.opacity(0.3)), in: Circle())
                         }
                         .disabled(isRatingLoading || movie.movieId == nil)
                         .padding(.bottom, 20)
@@ -185,7 +185,7 @@ struct MovieDetailView: View {
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
-                                .glassEffect(in: Circle())
+                                .glassEffect(.clear.tint(.black.opacity(0.3)), in: Circle())
                         }
                         .disabled(isRatingLoading || movie.movieId == nil)
                         .padding(.bottom, 20)
@@ -197,7 +197,7 @@ struct MovieDetailView: View {
                                 .font(.system(size: 22, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .frame(width: 56, height: 56)
-                                .glassEffect(in: Circle())
+                                .glassEffect(.clear.tint(.black.opacity(0.3)), in: Circle())
                         }
                         .buttonStyle(.plain)
                         .disabled(isWatchlistLoading || movie.movieId == nil)
@@ -452,7 +452,6 @@ private extension MovieDetailView {
                     .fill(.clear)
                     .glassEffect(in: Circle())
             )
-            .shadow(color: .black.opacity(0.18), radius: 10, x: 0, y: 5)
         } else {
             avatarFallback(size: size)
         }
